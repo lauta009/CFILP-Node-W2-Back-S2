@@ -8,6 +8,12 @@ export default (sequelize, DataTypes) => {
         foreignKey: 'categoria_id',
         as: 'libros'
       });
+      Categoria.belongsTo(Categoria, { 
+        as: 'parent',
+        foreignKey: 'categoria_id' });
+      Categoria.hasMany(Categoria, { 
+        as: 'subcategorias', 
+        foreignKey: 'categoria_id' });
     }
   }
   Categoria.init({
