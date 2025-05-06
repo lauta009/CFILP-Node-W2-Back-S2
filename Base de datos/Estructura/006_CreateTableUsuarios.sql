@@ -7,6 +7,7 @@ CREATE TABLE usuarios (
   telefono VARCHAR(20),
   direccion VARCHAR(150),
   localidad VARCHAR(100),
+  provincia VARCHAR(25),
   ultimo_login DATETIME,
   estado BOOLEAN,
   created_at DATETIME,
