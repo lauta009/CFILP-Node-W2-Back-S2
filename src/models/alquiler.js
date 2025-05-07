@@ -1,30 +1,47 @@
-'use strict';
-import { Model } from 'sequelize';
-export default (sequelize, DataTypes) => {
+import { Model, DataTypes } from 'sequelize';
+
+export default (sequelize) => {
   class Alquiler extends Model {
-   
     static associate(models) {
-      Alquiler.belongsTo(models.Usuario, {
-        foreignKey: 'usuario_id',
-        as: 'usuario'
-      });
-      Alquiler.belongsTo(models.Libro, {
-        foreignKey: 'libro_id',
-        as: 'libro'
-      });
+      Alquiler.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
+      Alquiler.belongsTo(models.Ejemplar, { foreignKey: 'ejemplar_id' });
     }
   }
+
   Alquiler.init({
-    usuario_id: DataTypes.INTEGER,
-    libro_id: DataTypes.INTEGER,
+    usuario_id: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'usuarios', // tabla relacionada
+        key: 'id'
+      }
+    },
+    ejemplar_id: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: 'ejemplares',
+        key: 'id'
+      }
+    },
     fecha_alquiler: DataTypes.DATE,
-    fecha_devolucion: DataTypes.DATE
+    fecha_vencimiento: DataTypes.DATE,
+    fecha_devolucion: DataTypes.DATE,
+    estado: {
+      type: DataTypes.ENUM('pendiente', 'devuelto', 'atrasado')
+    },
+    created_at: DataTypes.DATE,
+    updated_at: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Alquiler',
     tableName: 'alquileres',
-    underscored: true,
-    timestamps: true,
+    underscored: true
   });
+
+  Alquiler.addIndex(['usuario_id', 'ejemplar_id']);
+
+  Alquiler.addIndex(['estado']);
+  Alquiler.addIndex(['fecha_vencimiento']);
+
   return Alquiler;
 };

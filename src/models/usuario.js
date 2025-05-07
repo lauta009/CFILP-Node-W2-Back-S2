@@ -1,44 +1,92 @@
 'use strict';
-import { Model } from 'sequelize';
-export default (sequelize, DataTypes) => {
-  class Usuario extends Model {
+const { Model } = require('sequelize');
 
+module.exports = (sequelize, DataTypes) => {
+  class Usuario extends Model {
     static associate(models) {
-      Usuario.belongsTo(models.Rol, {
-        foreignKey: 'rol_id',
-        as: 'rol'
-      });
-      Usuario.hasMany(models.Alquiler, { foreignKey: 'usuario_id' });
-      Usuario.belongsToMany(models.Libro, {
-        through: models.Alquiler,
+      // Un usuario puede tener muchos alquileres
+      Usuario.hasMany(models.Alquiler, {
         foreignKey: 'usuario_id',
-        otherKey: 'libro_id'
+        as: 'alquileres',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      });
+
+      Usuario.belongsToMany(models.Rol, {
+        through: models.UsuarioRol,
+        foreignKey: 'usuario_id',
+        otherKey: 'rol_id',
+        as: 'roles',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
       });
     }
   }
+
   Usuario.init({
-    nombre: DataTypes.STRING,
-    apellido: DataTypes.STRING,
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
-    },
-    rol_id: {
+    id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      autoIncrement: true,
+      primaryKey: true,
     },
-    password: DataTypes.STRING,
-    tipo_usuario: {
-      type: DataTypes.ENUM('regular', 'premium'),
-      defaultValue: 'regular'
-    }
+    nombre: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    apellido: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      unique: true,
+    },
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    telefono: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    direccion: {
+      type: DataTypes.STRING(150),
+      allowNull: true,
+    },
+    localidad: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    ultimo_login: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    estado: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+    },
   }, {
     sequelize,
     modelName: 'Usuario',
     tableName: 'usuarios',
     underscored: true,
-    timestamps: true,
+    timestamps: false,
   });
+
+  Usuario.addIndex('usuarios_email_idx', ['email']);
+
   return Usuario;
 };
+

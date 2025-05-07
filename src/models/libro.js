@@ -1,28 +1,41 @@
-'use strict';
-import { Model } from 'sequelize';
-export default (sequelize, DataTypes) => {
+import { Model, DataTypes } from 'sequelize';
+
+export default (sequelize) => {
   class Libro extends Model {
-    
     static associate(models) {
+      Libro.belongsTo(models.Editorial, {
+        foreignKey: 'editorial_id',
+        as: 'editorial'
+      });
+
       Libro.belongsTo(models.Categoria, {
         foreignKey: 'categoria_id',
         as: 'categoria'
-      }); 
-      Libro.hasMany(models.Alquiler, { foreignKey: 'libro_id' });
-      Libro.belongsToMany(models.Usuario, {
-        through: models.Alquiler,
+      });
+
+      Libro.belongsToMany(models.Autor, {
+        through: models.AutoresLibros,
         foreignKey: 'libro_id',
-        otherKey: 'usuario_id'
+        otherKey: 'autor_id',
+        as: 'autores'
+      });
+
+      Libro.hasMany(models.Ejemplar, {
+        foreignKey: 'libro_id',
+        as: 'ejemplares'
       });
     }
   }
+
   Libro.init({
-    titulo: DataTypes.STRING,
-    autor: DataTypes.STRING,
-    editorial: DataTypes.STRING,
+    titulo: DataTypes.STRING(150),
+    editorial_id: DataTypes.INTEGER,
     fecha_publicacion: DataTypes.DATE,
-    isbn: DataTypes.STRING,
-    cantidad_total: DataTypes.INTEGER,
+    isbn: DataTypes.STRING(17),
+    resumen: DataTypes.TEXT,
+    portada_url: DataTypes.STRING(255),
+    idioma: DataTypes.STRING(50),
+    nro_paginas: DataTypes.INTEGER,
     es_premium: DataTypes.BOOLEAN,
     categoria_id: DataTypes.INTEGER
   }, {
@@ -30,8 +43,12 @@ export default (sequelize, DataTypes) => {
     modelName: 'Libro',
     tableName: 'libros',
     underscored: true,
-    timestamps: true,
+    timestamps: true
   });
-  
+
+  Libro.addIndex(['isbn']);
+  Libro.addIndex(['titulo']);
+  Libro.addIndex(['es_premium']);
+
   return Libro;
 };

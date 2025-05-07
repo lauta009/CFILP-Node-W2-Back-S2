@@ -1,25 +1,26 @@
-'use strict';
-import { Model } from 'sequelize';
-export default (sequelize, DataTypes) => {
-  class Permiso extends Model {
+import { Model, DataTypes } from 'sequelize';
 
+export default (sequelize) => {
+  class Permiso extends Model {
     static associate(models) {
       Permiso.belongsToMany(models.Rol, {
-        through: 'RolPermiso',
+        through: models.RolPermiso,
         foreignKey: 'permiso_id',
-        otherKey: 'rol_id',
         as: 'roles'
       });
     }
   }
+
   Permiso.init({
-    nombre: DataTypes.STRING
+    nombre: DataTypes.STRING,
+    created_at: DataTypes.DATE,
+    updated_at: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Permiso',
     tableName: 'permisos',
-    underscored: true,  
-    timestamps: true,
+    underscored: true
   });
+
   return Permiso;
 };
