@@ -1,10 +1,13 @@
 {
   "name": "cfilp-node-w2-back-s2",
   "version": "1.0.0",
+
   "description": "Repositorio Back Squad 2 | Node | CFI LP 25",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node --watch ./src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint . --fix"
   },
   "repository": {
     "type": "git",
@@ -17,10 +20,17 @@
   },
   "homepage": "https://github.com/alkemyTech/CFILP-Node-W2-Back-S2#readme",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "mysql2": "^3.14.1",
     "sequelize": "^6.37.7",
-    "sequelize-cli": "^6.6.2"
+    "sequelize-cli": "^6.6.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^9.26.0",
+    "globals": "^16.0.0"
   }
 }
