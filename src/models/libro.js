@@ -1,37 +1,31 @@
 'use strict';
-import { Model } from 'sequelize';
 module.exports = (sequelize, DataTypes) => {
-  class Libro extends Model {
-    
-    static associate(models) {
-      Libro.belongsTo(models.Categoria, {
-        foreignKey: 'categoria_id',
-        as: 'categoria'
-      }); 
-      Libro.hasMany(models.Alquiler, { foreignKey: 'libro_id' });
-      Libro.belongsToMany(models.Usuario, {
-        through: models.Alquiler,
-        foreignKey: 'libro_id',
-        otherKey: 'usuario_id'
-      });
-    }
-  }
-  Libro.init({
+  const Libro = sequelize.define('Libro', {
     titulo: DataTypes.STRING,
-    autor: DataTypes.STRING,
-    editorial: DataTypes.STRING,
+    editorial_id: DataTypes.INTEGER,
     fecha_publicacion: DataTypes.DATE,
     isbn: DataTypes.STRING,
-    cantidad_total: DataTypes.INTEGER,
+    resumen: DataTypes.TEXT,
+    portada_url: DataTypes.STRING,
+    idioma: DataTypes.STRING,
+    nro_paginas: DataTypes.INTEGER,
     es_premium: DataTypes.BOOLEAN,
     categoria_id: DataTypes.INTEGER
   }, {
-    sequelize,
-    modelName: 'Libro',
     tableName: 'libros',
-    underscored: true,
-    timestamps: true,
+    timestamps: true
   });
-  
+
+  Libro.associate = function(models) {
+    Libro.belongsTo(models.Editorial, { foreignKey: 'editorial_id' });
+    Libro.belongsTo(models.Categoria, { foreignKey: 'categoria_id' });
+    Libro.belongsToMany(models.Autor, {
+      through: 'autores_libros',
+      foreignKey: 'libro_id',
+      otherKey: 'autor_id'
+    });
+    Libro.hasMany(models.Ejemplar, { foreignKey: 'libro_id' });
+  };
+
   return Libro;
 };
