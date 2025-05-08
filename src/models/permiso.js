@@ -1,6 +1,6 @@
 'use strict';
 import { Model } from 'sequelize';
-export default (sequelize, DataTypes) => {
+module.exports = (sequelize, DataTypes) => {
   class Permiso extends Model {
 
     static associate(models) {

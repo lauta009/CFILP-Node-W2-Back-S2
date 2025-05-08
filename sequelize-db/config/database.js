@@ -1,6 +1,6 @@
-import { Sequelize } from 'sequelize'
-import { config } from 'dotenv'
-config()
+const { Sequelize } = require('sequelize');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const sequelize = new Sequelize(
   process.env.DB_NAME,
@@ -11,16 +11,19 @@ const sequelize = new Sequelize(
     dialect: 'mysql',
     logging: false,
   }
-)
+);
 
 // Función para sincronizar modelos
-export const sync = async () => {
+const sync = async () => {
   try {
-    await sequelize.sync({ force: false })
-    console.log('Base de datos sincronizada.')
+    await sequelize.sync({ force: false });
+    console.log('Base de datos sincronizada.');
   } catch (error) {
-    console.error('Error al sincronizar la base de datos:', error)
+    console.error('Error al sincronizar la base de datos:', error);
   }
-}
+};
 
-export default sequelize
+module.exports = {
+  sequelize,
+  sync
+};
