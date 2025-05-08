@@ -1,44 +1,28 @@
 'use strict';
-import { Model } from 'sequelize';
-module.exports =(sequelize, DataTypes) => {
-  class Usuario extends Model {
-
-    static associate(models) {
-      Usuario.belongsTo(models.Rol, {
-        foreignKey: 'rol_id',
-        as: 'rol'
-      });
-      Usuario.hasMany(models.Alquiler, { foreignKey: 'usuario_id' });
-      Usuario.belongsToMany(models.Libro, {
-        through: models.Alquiler,
-        foreignKey: 'usuario_id',
-        otherKey: 'libro_id'
-      });
-    }
-  }
-  Usuario.init({
+module.exports = (sequelize, DataTypes) => {
+  const Usuario = sequelize.define('Usuario', {
     nombre: DataTypes.STRING,
     apellido: DataTypes.STRING,
-    email: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
-    },
-    rol_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
+    email: DataTypes.STRING,
     password: DataTypes.STRING,
-    tipo_usuario: {
-      type: DataTypes.ENUM('regular', 'premium'),
-      defaultValue: 'regular'
-    }
+    telefono: DataTypes.STRING,
+    direccion: DataTypes.STRING,
+    localidad: DataTypes.STRING,
+    ultimo_login: DataTypes.DATE,
+    estado: DataTypes.BOOLEAN
   }, {
-    sequelize,
-    modelName: 'Usuario',
     tableName: 'usuarios',
-    underscored: true,
-    timestamps: true,
+    timestamps: true
   });
+
+  Usuario.associate = function(models) {
+    Usuario.hasMany(models.Alquiler, { foreignKey: 'usuario_id' });
+    Usuario.belongsToMany(models.Rol, {
+      through: 'usuario_roles',
+      foreignKey: 'usuario_id',
+      otherKey: 'rol_id'
+    });
+  };
+
   return Usuario;
 };

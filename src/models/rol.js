@@ -1,28 +1,24 @@
 'use strict';
-import { Model } from 'sequelize';
 module.exports = (sequelize, DataTypes) => {
-  class Rol extends Model {
-
-    static associate(models) {
-      Rol.hasMany(models.Usuario, {
-        foreignKey: 'rol_id',
-        as: 'usuarios'
-      });
-      Rol.belongsToMany(models.Permiso, {
-        through: 'roles_permisos',
-        foreignKey: 'rol_id',
-        as: 'permisos',
-      });
-    }
-  }
-  Rol.init({
+  const Rol = sequelize.define('Rol', {
     nombre: DataTypes.STRING
   }, {
-    sequelize,
-    modelName: 'Rol',
     tableName: 'roles',
-    underscored: true,
-    timestamps: true,
+    timestamps: true
   });
+
+  Rol.associate = function(models) {
+    Rol.belongsToMany(models.Permiso, {
+      through: 'roles_permisos',
+      foreignKey: 'rol_id',
+      otherKey: 'permiso_id'
+    });
+    Rol.belongsToMany(models.Usuario, {
+      through: 'usuario_roles',
+      foreignKey: 'rol_id',
+      otherKey: 'usuario_id'
+    });
+  };
+
   return Rol;
 };
