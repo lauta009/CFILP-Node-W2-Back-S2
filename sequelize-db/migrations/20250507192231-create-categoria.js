@@ -18,7 +18,8 @@ export async function up(queryInterface, Sequelize) {
         key: 'id'
       },
       onUpdate: 'CASCADE',
-      onDelete: 'SET NULL'
+      onDelete: 'SET NULL',
+      allowNull: true 
     },
     created_at: {
       allowNull: false,
