@@ -1,6 +1,6 @@
-import { Model, DataTypes } from 'sequelize';
+const { Model, DataTypes } = require('sequelize');
 
-export default (sequelize) => {
+module.exports = (sequelize) => {
   class Libro extends Model {
     static associate(models) {
       Libro.belongsTo(models.Editorial, {

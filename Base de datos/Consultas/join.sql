@@ -1,5 +1,5 @@
--- Join de tablas para obtener el libro mas alquilado
-SELECT l.titulo,l.isbn COUNT(a.id) AS total_alquileres
+-- Join de tablas para obtener los 10 libros más alquilados
+SELECT l.titulo, l.isbn, COUNT(a.ejemplar_id) AS total_alquileres
 FROM libros l
 JOIN ejemplares e ON l.id = e.libro_id
 JOIN alquileres a ON e.id = a.ejemplar_id
