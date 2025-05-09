@@ -1,6 +1,6 @@
 const { Libro, Autor, Categoria, Editorial } = require('../models');
 
-// Función auxiliar para buscar o crear entidad
+
 async function obtenerOcrearEntidad(Modelo, valor, campo = 'nombre') {
   if (typeof valor === 'number') {
     const entidad = await Modelo.findByPk(valor);
@@ -15,7 +15,6 @@ async function obtenerOcrearEntidad(Modelo, valor, campo = 'nombre') {
   throw new Error(`Formato no válido para ${Modelo.name}`);
 }
 
-// Función auxiliar para procesar autores
 async function obtenerAutores(autoresInput) {
   if (!Array.isArray(autoresInput) || autoresInput.length === 0) {
     throw new Error('Debe enviar al menos un autor');
@@ -28,7 +27,6 @@ async function obtenerAutores(autoresInput) {
   return autores;
 }
 
-// Función principal
 async function crearLibro(datos) {
   const {
     titulo,
@@ -46,12 +44,10 @@ async function crearLibro(datos) {
     autores
   } = datos;
 
-  // Obtener o crear entidades relacionadas
   const categoriaFinal = await obtenerOcrearEntidad(Categoria, categoria_id || categoria);
   const editorialFinal = await obtenerOcrearEntidad(Editorial, editorial_id || editorial);
   const autoresFinal = await obtenerAutores(autores);
 
-  // Crear el libro
   const nuevoLibro = await Libro.create({
     titulo,
     fecha_publicacion,
@@ -65,14 +61,11 @@ async function crearLibro(datos) {
     editorial_id: editorialFinal.id
   });
 
-  // Asociar autores
   await nuevoLibro.setAutores(autoresFinal);
 
   return await Libro.findByPk(nuevoLibro.id, {
     include: ['categoria', 'editorial', 'autores']
   });
-
-
 }
 
 const listarLibros = async () => {
