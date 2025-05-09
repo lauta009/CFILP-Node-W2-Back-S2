@@ -1,5 +1,6 @@
 const { body, param } = require('express-validator');
 const { Autor, Categoria, Editorial } = require('../../models');
+const { validarISBNconOpenLibrary } = require('../../utils/externalApis');
 
 const existeEntidadPorId = (modelo, nombre) => {
   return async (id) => {
@@ -32,7 +33,9 @@ const crearLibroValidator = [
 
   body('isbn')
     .optional({ checkFalsy: true })
-    .isLength({ max: 17 }),
+    .isLength({ max: 17 })
+    .bail()
+    .custom(validarISBNconOpenLibrary),
 
   body('resumen')
     .optional()
@@ -56,14 +59,9 @@ const crearLibroValidator = [
   body('autores')
     .isArray({ min: 1 }).withMessage('Debe ser un array de IDs de autores')
     .custom(async (autoresIds) => {
-      const resultados = await Promise.all(
-        autoresIds.map(id => existeEntidadPorId(Autor, id))
+      await Promise.all(
+        autoresIds.map(id => existeEntidadPorId(Autor, 'Autor')(id))
       );
-      
-      const noExistentes = autoresIds.filter((id, index) => !resultados[index]);
-      if (noExistentes.length > 0) {
-        throw new Error(`Los siguientes autores no existen: ${noExistentes.join(', ')}`);
-      }
       return true;
     }),
 ];
