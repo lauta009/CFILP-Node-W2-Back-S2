@@ -8,4 +8,4 @@ const validarErrores = (req, res, next) => {
   next();
 };
 
-module.exports = { validarErrores };
+module.exports = validarErrores;

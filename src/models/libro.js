@@ -28,27 +28,62 @@ module.exports = (sequelize) => {
   }
 
   Libro.init({
-    titulo: DataTypes.STRING(150),
-    editorial_id: DataTypes.INTEGER,
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true
+    },
+    titulo: {
+      type: DataTypes.STRING(150),
+      allowNull: false
+    },
+    editorial_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'editoriales',
+        key: 'id'
+      }
+    },
     fecha_publicacion: DataTypes.DATE,
-    isbn: DataTypes.STRING(17),
+    isbn: {
+      type: DataTypes.STRING(17),
+      unique: true
+    },
     resumen: DataTypes.TEXT,
     portada_url: DataTypes.STRING(255),
     idioma: DataTypes.STRING(50),
     nro_paginas: DataTypes.INTEGER,
-    es_premium: DataTypes.BOOLEAN,
-    categoria_id: DataTypes.INTEGER
+    es_premium: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    categoria_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'categorias',
+        key: 'id'
+      }
+    }
   }, {
     sequelize,
     modelName: 'Libro',
     tableName: 'libros',
     underscored: true,
-    timestamps: true
+    timestamps: true,
+    indexes: [
+      {
+        fields: ['isbn']
+      },
+      {
+        fields: ['titulo']
+      },
+      {
+        fields: ['es_premium']
+      }
+    ]
   });
-
-  Libro.addIndex(['isbn']);
-  Libro.addIndex(['titulo']);
-  Libro.addIndex(['es_premium']);
 
   return Libro;
 };

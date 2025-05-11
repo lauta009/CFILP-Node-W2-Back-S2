@@ -11,21 +11,31 @@ module.exports = (sequelize) => {
   Alquiler.init({
     usuario_id: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
       references: {
-        model: 'usuarios', // tabla relacionada
+        model: 'usuarios',
         key: 'id'
       }
     },
     ejemplar_id: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
       references: {
         model: 'ejemplares',
         key: 'id'
       }
     },
-    fecha_alquiler: DataTypes.DATE,
-    fecha_vencimiento: DataTypes.DATE,
-    fecha_devolucion: DataTypes.DATE,
+    fecha_alquiler: {
+      type: DataTypes.DATE
+    },
+    fecha_vencimiento: {
+      type: DataTypes.DATE
+    },
+    fecha_devolucion: {
+      type: DataTypes.DATE
+    },
     estado: {
       type: DataTypes.ENUM('pendiente', 'devuelto', 'atrasado')
     },
@@ -35,12 +45,20 @@ module.exports = (sequelize) => {
     sequelize,
     modelName: 'Alquiler',
     tableName: 'alquileres',
-    underscored: true
+    underscored: true,
+    timestamps: true,
+    indexes: [
+      {
+        fields: ['usuario_id', 'ejemplar_id']
+      },
+      {
+        fields: ['estado']
+      },
+      {
+        fields: ['fecha_vencimiento']
+      }
+    ]
   });
-
-  Alquiler.addIndex(['usuario_id', 'ejemplar_id']);
-  Alquiler.addIndex(['estado']);
-  Alquiler.addIndex(['fecha_vencimiento']);
 
   return Alquiler;
 };

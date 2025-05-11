@@ -1,37 +1,44 @@
 const express = require('express');
 const router = express.Router();
 
-const libroController = require('../controllers/libro.controller');
+const {
+  crear,
+  listar,
+  obtenerPorId,
+  actualizar,
+  eliminar
+} = require('../controllers/libro.controller');
+
+
 const { crearLibroValidator, idLibroValidator } = require('../middlewares/validaciones/libro.validaciones');
-const validarErrores = require('../middlewares/validarErrores');
+const validarErrores = require('../middlewares/validaciones/validarErrores');
 
-
-router.get('/', libroController.listar);
+router.get('/', listar);
 
 router.get('/:id',
   idLibroValidator,
   validarErrores,
-  libroController.obtenerPorId
+  obtenerPorId
 );
 
 router.post(
   '/',
   crearLibroValidator,
   validarErrores,
-  libroController.crear
+  crear
 );
 
 router.put('/:id',
   idLibroValidator,
   crearLibroValidator,
   validarErrores,
-  libroController.actualizar
+  actualizar
 );
 
 router.delete('/:id',
   idLibroValidator,
   validarErrores,
-  libroController.eliminar
+  eliminar
 );
 
 module.exports = router;

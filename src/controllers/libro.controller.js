@@ -15,7 +15,6 @@ const libroController = {
     }
   },
 
-
   async listar(req, res) {
     try {
       const libros = await libroService.listarLibros();

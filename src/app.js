@@ -4,11 +4,12 @@ const { sync } = require('../sequelize-db/config/database');
 const setupSwagger = require('../docs/swagger');
 const libroRoutes = require('./routes/libro.routes');
 
-dotenv.config(); // Cargar variables de entorno
+dotenv.config(); 
 
 const app = express();
 
-// Middlewares
+// Middlewares de aplicación
+app.use(express.urlencoded({ extended: true })); 
 app.use(express.json());
 
 // Rutas

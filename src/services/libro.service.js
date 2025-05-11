@@ -1,6 +1,7 @@
 const { Libro, Autor, Categoria, Editorial } = require('../models');
-
-
+const { validarISBNconOpenLibrary } = require('../utils/externalApis');
+const { Op } = require('sequelize');
+  
 async function obtenerOcrearEntidad(Modelo, valor, campo = 'nombre') {
   if (typeof valor === 'number') {
     const entidad = await Modelo.findByPk(valor);
@@ -27,6 +28,18 @@ async function obtenerAutores(autoresInput) {
   return autores;
 }
 
+async function verificarISBNenLaDb(isbn, idIgnorar = null) {
+  const where = { isbn };
+  if (idIgnorar) {
+    where.id = { [Op.ne]: idIgnorar }; // Excluir el libro actual en updates
+  }
+
+  const existente = await Libro.findOne({ where });
+  if (existente) {
+    throw new Error(`Ya existe un libro con el ISBN ${isbn}`);
+  }
+}
+
 async function crearLibro(datos) {
   const {
     titulo,
@@ -43,6 +56,9 @@ async function crearLibro(datos) {
     editorial,
     autores
   } = datos;
+
+  await validarISBNconOpenLibrary(isbn); 
+  await verificarISBNenLaDb(isbn);
 
   const categoriaFinal = await obtenerOcrearEntidad(Categoria, categoria_id || categoria);
   const editorialFinal = await obtenerOcrearEntidad(Editorial, editorial_id || editorial);
@@ -83,6 +99,10 @@ const obtenerLibroPorId = async (id) => {
 const actualizarLibro = async (id, datos) => {
   const libro = await Libro.findByPk(id);
   if (!libro) throw new Error('Libro no encontrado');
+  if (datos.isbn) {
+    await validarISBNconOpenLibrary(datos.isbn);
+    await verificarISBNunico(datos.isbn, id);
+  }
   await libro.update(datos);
   return await obtenerLibroPorId(id);
 };

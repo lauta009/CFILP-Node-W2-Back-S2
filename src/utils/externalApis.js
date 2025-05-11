@@ -11,3 +11,7 @@ async function validarISBNconOpenLibrary(isbn) {
     throw new Error('Error al consultar el ISBN en OpenLibrary');
   }
 }
+
+module.exports = {
+  validarISBNconOpenLibrary,
+};

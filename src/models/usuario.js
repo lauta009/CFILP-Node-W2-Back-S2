@@ -3,7 +3,7 @@ const { Model, DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
   class Usuario extends Model {
     static associate(models) {
-      // Un usuario puede tener muchos alquileres
+      
       Usuario.hasMany(models.Alquiler, {
         foreignKey: 'usuario_id',
         as: 'alquileres',
@@ -82,9 +82,12 @@ module.exports = (sequelize) => {
     tableName: 'usuarios',
     underscored: true,
     timestamps: false,
+    indexes: [
+      {
+        fields: ['email']
+      }
+    ]
   });
-
-  Usuario.addIndex('usuarios_email_idx', ['email']);
 
   return Usuario;
 };
