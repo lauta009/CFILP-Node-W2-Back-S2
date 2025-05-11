@@ -1,6 +1,6 @@
-import { Model, DataTypes } from 'sequelize';
+const { Model, DataTypes } = require('sequelize');
 
-export default (sequelize) => {
+module.exports = (sequelize) => {
   class Alquiler extends Model {
     static associate(models) {
       Alquiler.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
@@ -39,7 +39,6 @@ export default (sequelize) => {
   });
 
   Alquiler.addIndex(['usuario_id', 'ejemplar_id']);
-
   Alquiler.addIndex(['estado']);
   Alquiler.addIndex(['fecha_vencimiento']);
 

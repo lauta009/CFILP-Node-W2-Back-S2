@@ -1,21 +1,23 @@
-import { DataTypes } from 'sequelize';
+'use strict';
 
-export async function up(queryInterface, Sequelize) {
-  await queryInterface.createTable('roles', {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true
-    },
-    nombre: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE
-  });
-}
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.createTable('roles', {
+      id: {
+        type: Sequelize.DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
+      },
+      nombre: {
+        type: Sequelize.DataTypes.STRING,
+        allowNull: false
+      },
+      created_at: Sequelize.DataTypes.DATE,
+      updated_at: Sequelize.DataTypes.DATE
+    });
+  },
 
-export async function down(queryInterface) {
-  await queryInterface.dropTable('roles');
-}
+  down: async (queryInterface) => {
+    await queryInterface.dropTable('roles');
+  }
+};

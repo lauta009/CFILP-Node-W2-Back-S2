@@ -1,7 +1,6 @@
-'use strict';
-import { Model } from 'sequelize';
+const { Model, DataTypes } = require('sequelize');
 
-export default (sequelize, DataTypes) => {
+module.exports = (sequelize) => {
   class Usuario extends Model {
     static associate(models) {
       // Un usuario puede tener muchos alquileres

@@ -1,28 +1,27 @@
-import { DataTypes } from 'sequelize';
+const { Model, DataTypes } = require('sequelize');
 
-export async function up(queryInterface) {
-  await queryInterface.createTable('autores_libros', {
-    libro_id: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'libros',
-        key: 'id'
-      }
-    },
+module.exports = (sequelize) => {
+  class AutoresLibros extends Model {}
+
+  AutoresLibros.init({
     autor_id: {
       type: DataTypes.INTEGER,
-      references: {
-        model: 'autores',
-        key: 'id'
-      }
+      allowNull: false,
+      primaryKey: true
     },
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE
+    libro_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true
+    }
+  }, {
+    sequelize,
+    modelName: 'AutoresLibros',
+    tableName: 'autores_libros',
+    underscored: true,
+    timestamps: true
   });
 
-  await queryInterface.addIndex('autores_libros', ['libro_id', 'autor_id'], { unique: true });
-}
+  return AutoresLibros;
+};
 
-export async function down(queryInterface) {
-  await queryInterface.dropTable('autores_libros');
-}

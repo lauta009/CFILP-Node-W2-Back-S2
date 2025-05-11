@@ -1,6 +1,6 @@
-import { Model, DataTypes } from 'sequelize';
+const { Model, DataTypes } = require('sequelize');
 
-export default (sequelize) => {
+module.exports = (sequelize) => {
   class UsuarioRol extends Model {
     static associate(models) {
       UsuarioRol.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
@@ -9,20 +9,23 @@ export default (sequelize) => {
   }
 
   UsuarioRol.init({
-    usuario_id: DataTypes.INTEGER,
-    rol_id: DataTypes.INTEGER,
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE
+    usuario_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true
+    },
+    rol_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true
+    }
   }, {
     sequelize,
     modelName: 'UsuarioRol',
     tableName: 'usuario_roles',
-    underscored: true
+    underscored: true,
+    timestamps: true  
   });
-
-  UsuarioRol.addIndex('usuario_roles_usuario_id_idx', ['usuario_id']);
-  UsuarioRol.addIndex('usuario_roles_rol_id_idx', ['rol_id']);
-
 
   return UsuarioRol;
 };

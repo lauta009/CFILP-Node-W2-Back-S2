@@ -1,7 +1,6 @@
 {
   "name": "cfilp-node-w2-back-s2",
   "version": "1.0.0",
-  "type": "module",
   "description": "Repositorio Back Squad 2 | Node | CFI LP 25",
   "main": "app.js",
   "scripts": {

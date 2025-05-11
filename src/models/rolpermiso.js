@@ -1,6 +1,6 @@
-import { Model, DataTypes } from 'sequelize';
+const { Model, DataTypes, Sequelize } = require('sequelize');
 
-export default (sequelize) => {
+module.exports = (sequelize) => {
   class RolPermiso extends Model {
     static associate(models) {
       RolPermiso.belongsTo(models.Rol, { foreignKey: 'rol_id' });
@@ -9,19 +9,30 @@ export default (sequelize) => {
   }
 
   RolPermiso.init({
-    rol_id: DataTypes.INTEGER,
-    permiso_id: DataTypes.INTEGER,
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE
+    rol_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true
+    },
+    permiso_id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+    }
   }, {
     sequelize,
     modelName: 'RolPermiso',
     tableName: 'roles_permisos',
-    underscored: true
+    underscored: true,
+    timestamps: true
   });
-
-  RolPermiso.addIndex('roles_permisos_rol_id_idx', ['rol_id']);
-  RolPermiso.addIndex('roles_permisos_permiso_id_idx', ['permiso_id']);
 
   return RolPermiso;
 };
+
