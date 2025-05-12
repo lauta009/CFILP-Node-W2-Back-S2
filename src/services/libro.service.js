@@ -84,11 +84,61 @@ async function crearLibro(datos) {
   });
 }
 
-const listarLibros = async () => {
-  return await Libro.findAll({
-    include: ['editorial', 'categoria', 'autores']
-  });
-};
+async function listarLibros(filtro = 'todos') {
+  let query = `
+    SELECT DISTINCT l.*
+    FROM libros l
+    JOIN ejemplares e ON e.libro_id = l.id
+  `;
+
+  switch (filtro) {
+  case 'disponibles':
+    query += ' WHERE e.estado = \'disponible\'';
+    break;
+
+  case 'sinDisponibles':
+    query += `
+        GROUP BY l.id
+        HAVING SUM(CASE WHEN e.estado = 'disponible' THEN 1 ELSE 0 END) = 0
+      `;
+    break;
+
+  case 'todosPrestados':
+    query += `
+        GROUP BY l.id
+        HAVING COUNT(*) = SUM(CASE WHEN e.estado = 'prestado' THEN 1 ELSE 0 END)
+      `;
+    break;
+
+  default:
+    query = 'SELECT * FROM libros'; 
+  }
+
+  const [libros] = await sequelize.query(query);
+
+  const librosConRelaciones = await Promise.all(libros.map(async (libro) => {
+    const [editorial] = await sequelize.query(
+      `SELECT * FROM editoriales WHERE id = ${libro.editorial_id}`
+    );
+    const [categoria] = await sequelize.query(
+      `SELECT * FROM categorias WHERE id = ${libro.categoria_id}`
+    );
+    const [autores] = await sequelize.query(
+      `SELECT a.* FROM autores a
+       JOIN autores_libros al ON al.autor_id = a.id
+       WHERE al.libro_id = ${libro.id}`
+    );
+
+    return {
+      ...libro,
+      editorial: editorial[0] || null,
+      categoria: categoria[0] || null,
+      autores
+    };
+  }));
+
+  return librosConRelaciones;
+}
 
 const obtenerLibroPorId = async (id) => {
   return await Libro.findByPk(id, {
