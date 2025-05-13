@@ -1,31 +1,48 @@
 const { Libro, Autor, Categoria, Editorial, Ejemplar } = require('../models');
 const { validarISBNconOpenLibrary } = require('../utils/externalApis');
 const { Op } = require('sequelize');
-  
+ 
+// Para obtener o crear una entidad (Autor, Categoria, Editorial) en la base de datos
+// Si el valor es un número, busca por ID. Si es una cadena, busca por nombre y crea si no existe.
 async function obtenerOcrearEntidad(Modelo, valor, campo = 'nombre') {
+  if (!valor) {
+    return null; 
+  }
   if (typeof valor === 'number') {
     const entidad = await Modelo.findByPk(valor);
     if (!entidad) throw new Error(`${Modelo.name} con ID ${valor} no existe`);
     return entidad;
   } else if (typeof valor === 'string') {
     const [entidad] = await Modelo.findOrCreate({
-      where: { [campo]: valor }
+      where: { [campo]: valor.trim() } 
     });
     return entidad;
   }
   throw new Error(`Formato no válido para ${Modelo.name}`);
 }
 
+// Para obtener o crear autores
+// Si el valor es un número, busca por ID. Si es una cadena, busca por nombre y crea si no existe.
 async function obtenerAutores(autoresInput) {
-  if (!Array.isArray(autoresInput) || autoresInput.length === 0) {
-    throw new Error('Debe enviar al menos un autor');
+  if (!autoresInput || !Array.isArray(autoresInput) || autoresInput.length === 0) {
+    return [];
   }
 
-  const autores = await Promise.all(
-    autoresInput.map((autor) => obtenerOcrearEntidad(Autor, autor))
-  );
+  const autoresPromises = autoresInput.map(async (autorInput) => {
+    if (typeof autorInput === 'number') {
+      const autor = await Autor.findByPk(autorInput);
+      if (!autor) throw new Error(`Autor con ID ${autorInput} no existe`);
+      return autor;
+    } else if (typeof autorInput === 'string') {
+      const [autor] = await Autor.findOrCreate({
+        where: { nombre: autorInput.trim() } 
+      });
+      return autor;
+    }
+    throw new Error('Formato no válido para el autor');
+  });
 
-  return autores;
+  return await Promise.all(autoresPromises);
 }
 
 async function verificarISBNenLaDb(isbn, idIgnorar = null) {
@@ -57,8 +74,10 @@ async function crearLibro(datos) {
     autores
   } = datos;
 
-  await validarISBNconOpenLibrary(isbn); 
-  await verificarISBNenLaDb(isbn);
+  if (isbn) {
+    await validarISBNconOpenLibrary(isbn);
+    await verificarISBNenLaDb(isbn); 
+  }
 
   const categoriaFinal = await obtenerOcrearEntidad(Categoria, categoria_id || categoria);
   const editorialFinal = await obtenerOcrearEntidad(Editorial, editorial_id || editorial);
@@ -73,8 +92,8 @@ async function crearLibro(datos) {
     idioma,
     nro_paginas,
     es_premium,
-    categoria_id: categoriaFinal.id,
-    editorial_id: editorialFinal.id
+    categoriaId: categoriaFinal ? categoriaFinal.id : null, // Permitir null si no se proporciona
+    editorialId: editorialFinal ? editorialFinal.id : null // Permitir null si no se proporciona
   });
 
   await nuevoLibro.setAutores(autoresFinal);
@@ -83,6 +102,7 @@ async function crearLibro(datos) {
     include: ['categoria', 'editorial', 'autores']
   });
 }
+
 
 async function listarLibros({ categoria, editorial, autor, page = 1, limit = 10, detalle = 'completo' }) {
   const offset = (parseInt(page) - 1) * parseInt(limit);
