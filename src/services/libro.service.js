@@ -1,4 +1,4 @@
-const { Libro, Autor, Categoria, Editorial } = require('../models');
+const { Libro, Autor, Categoria, Editorial, Ejemplar } = require('../models');
 const { validarISBNconOpenLibrary } = require('../utils/externalApis');
 const { Op } = require('sequelize');
   
@@ -84,60 +84,101 @@ async function crearLibro(datos) {
   });
 }
 
-async function listarLibros(filtro = 'todos') {
-  let query = `
-    SELECT DISTINCT l.*
-    FROM libros l
-    JOIN ejemplares e ON e.libro_id = l.id
-  `;
+async function listarLibros({ categoria, editorial, autor, page = 1, limit = 10, detalle = 'completo' }) {
+  const offset = (parseInt(page) - 1) * parseInt(limit);
+  const include = [];
+  const attributes = ['id', 'titulo', 'isbn']; 
+  const group = ['Libro.id']; // Para evitar duplicados con las inclusiones
 
-  switch (filtro) {
-  case 'disponibles':
-    query += ' WHERE e.estado = \'disponible\'';
-    break;
-
-  case 'sinDisponibles':
-    query += `
-        GROUP BY l.id
-        HAVING SUM(CASE WHEN e.estado = 'disponible' THEN 1 ELSE 0 END) = 0
-      `;
-    break;
-
-  case 'todosPrestados':
-    query += `
-        GROUP BY l.id
-        HAVING COUNT(*) = SUM(CASE WHEN e.estado = 'prestado' THEN 1 ELSE 0 END)
-      `;
-    break;
-
-  default:
-    query = 'SELECT * FROM libros'; 
+  if (detalle === 'basico' || detalle === 'completo') {
+    attributes.push('categoria_id'); 
+    include.push({
+      model: Categoria,
+      as: 'categoria',
+      attributes: ['nombre'],
+      where: categoria ? { nombre: { [Op.like]: `%${categoria}%` } } : {},
+      required: false,
+    });
+    include.push({
+      model: Ejemplar,
+      as: 'ejemplares',
+      attributes: ['codigo_barra'],
+      required: false,
+    });
   }
 
-  const [libros] = await sequelize.query(query);
+  if (detalle === 'completo') {
+    attributes.push(
+      'fecha_publicacion',
+      'portada_url',
+      'resumen',
+      'idioma',
+      'nro_paginas',
+      'es_premium',
+      'editorial_id' 
+    );
+    include.push({
+      model: Editorial,
+      as: 'editorial',
+      attributes: ['nombre'],
+      where: editorial ? { nombre: { [Op.like]: `%${editorial}%` } } : {},
+      required: false,
+    });
+    include.push({
+      model: Autor,
+      as: 'autores',
+      attributes: ['nombre'],
+      through: { attributes: [] },
+      where: autor ? { nombre: { [Op.like]: `%${autor}%` } } : {},
+      required: false,
+    });
+  }
 
-  const librosConRelaciones = await Promise.all(libros.map(async (libro) => {
-    const [editorial] = await sequelize.query(
-      `SELECT * FROM editoriales WHERE id = ${libro.editorial_id}`
-    );
-    const [categoria] = await sequelize.query(
-      `SELECT * FROM categorias WHERE id = ${libro.categoria_id}`
-    );
-    const [autores] = await sequelize.query(
-      `SELECT a.* FROM autores a
-       JOIN autores_libros al ON al.autor_id = a.id
-       WHERE al.libro_id = ${libro.id}`
-    );
+  const { count, rows } = await Libro.findAndCountAll({
+    where: {}, // Las condiciones de filtro por categoría, editorial y autor ahora están en el 'include'
+    include,
+    attributes,
+    limit: parseInt(limit),
+    offset,
+    order: [['id', 'ASC']],
+    distinct: true,
+    group, // Para evitar duplicados
+  });
 
-    return {
-      ...libro,
-      editorial: editorial[0] || null,
-      categoria: categoria[0] || null,
-      autores
+  const librosFormateados = rows.map(libro => {
+    const libroBase = {
+      id: libro.id,
+      titulo: libro.titulo,
+      isbn: libro.isbn,
+      categoria: libro.categoria ? libro.categoria.nombre : null,
+      ejemplares: libro.ejemplares ? libro.ejemplares.map(e => e.codigo_barra) : [],
     };
-  }));
 
-  return librosConRelaciones;
+    if (detalle === 'completo') {
+      return {
+        ...libroBase,
+        fecha_publicacion: libro.fecha_publicacion,
+        portada_url: libro.portada_url,
+        resumen: libro.resumen,
+        idioma: libro.idioma,
+        nro_paginas: libro.nro_paginas,
+        es_premium: libro.es_premium,
+        editorial: libro.editorial ? libro.editorial.nombre : null,
+        autores: libro.autores ? libro.autores.map(a => a.nombre).join(', ') : [],
+      };
+    }
+
+    return libroBase;
+  });
+
+  const totalPages = Math.ceil(count / limit);
+
+  return {
+    total: count,
+    totalPages,
+    currentPage: parseInt(page),
+    libros: librosFormateados,
+  };
 }
 
 const obtenerLibroPorId = async (id) => {

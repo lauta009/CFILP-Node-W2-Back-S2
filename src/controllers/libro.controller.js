@@ -17,8 +17,17 @@ const libroController = {
 
   async listar(req, res) {
     try {
-      const libros = await libroService.listarLibros();
-      res.status(200).json(libros);
+      const { categoria, editorial, autor, page, limit, detalle } = req.query;
+      const params = {
+        categoria: categoria ?? null,
+        editorial: editorial ?? undefined,
+        autor: autor ?? undefined,
+        page: page ?? 1,
+        limit: limit ?? 10,
+        detalle: detalle ?? 'completo', 
+      };
+      const resultado = await libroService.listarLibros(params);
+      res.status(200).json(resultado);
     } catch (error) {
       console.error('Error al obtener los libros:', error);
       res.status(500).json({ error: 'Error al obtener los libros' });
