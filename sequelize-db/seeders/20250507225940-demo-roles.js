@@ -12,7 +12,8 @@ module.exports = {
         nombre: 'usuario',
         created_at: new Date(),
         updated_at: new Date()
-      }
+      },
+
     ]);
   },
 

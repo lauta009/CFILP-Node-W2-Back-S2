@@ -1,10 +1,11 @@
 'use strict';
 
+
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.bulkInsert('roles_permisos', [
       // ADMIN (id: 1)
-      ...[19, 21, 23, 25, 27, 29, 31, 33, 34].map(permiso_id => ({
+      ...[1, 3, 5, 7, 8, 9, 11, 15].map(permiso_id => ({
         rol_id: 1,
         permiso_id,
         created_at: new Date(),
@@ -12,7 +13,7 @@ module.exports = {
       })),
 
       // USUARIO REGULAR (id: 2)
-      ...[29, 31, 33, 34, 28, 30].map(permiso_id => ({
+      ...[2, 4, 6, 10, 12, 13, 16].map(permiso_id => ({
         rol_id: 2,
         permiso_id,
         created_at: new Date(),
@@ -20,8 +21,8 @@ module.exports = {
       })),
 
       // USUARIO PREMIUM (id: 5)
-      ...[19, 29, 31, 33, 34, 28, 30].map(permiso_id => ({
-        rol_id: 5,
+      ...[2, 4, 6, 10, 12, 13, 14, 16].map(permiso_id => ({
+        rol_id: 3,
         permiso_id,
         created_at: new Date(),
         updated_at: new Date()

@@ -7,7 +7,7 @@ const {
   obtenerPorId,
   actualizar,
   eliminar
-} = require('../controllers/libro.controller');
+} = require('../Controllers/libro.controller');
 
 const { crearLibroValidator, idLibroValidator } = require('../middlewares/validaciones/libro.validaciones');
 const validarErrores = require('../middlewares/validaciones/validarErrores');

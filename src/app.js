@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const { sync } = require('../sequelize-db/config/database');
 const setupSwagger = require('../docs/swagger');
 const libroRoutes = require('./routes/libro.routes');
-
+const userRoutes = require('./routes/user.routes');
 dotenv.config(); 
 
 const app = express();
@@ -14,6 +14,7 @@ app.use(express.json());
 
 // Rutas
 app.use('/api/libros', libroRoutes);
+app.use('/api/users', userRoutes);
 
 
 // Manejador de errores
