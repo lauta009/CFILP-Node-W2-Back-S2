@@ -1,7 +1,5 @@
 'use strict';
 
-'use strict';
-
 module.exports = {
   up: async (queryInterface) => {
     //await queryInterface.removeIndex('roles_permisos', 'roles_permisos_rol_id_idx');

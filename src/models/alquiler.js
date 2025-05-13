@@ -47,6 +47,18 @@ module.exports = (sequelize) => {
     tableName: 'alquileres',
     underscored: true,
     timestamps: true,
+    indexes: [
+      {
+        fields: ['usuario_id', 'ejemplar_id']
+      },
+      {
+        fields: ['estado']
+      },
+      {
+        fields: ['fecha_vencimiento']
+      }
+    ]
   });
+
   return Alquiler;
 };
