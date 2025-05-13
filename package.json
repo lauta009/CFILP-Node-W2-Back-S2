@@ -1,7 +1,6 @@
 {
   "name": "cfilp-node-w2-back-s2",
   "version": "1.0.0",
-
   "description": "Repositorio Back Squad 2 | Node | CFI LP 25",
   "main": "app.js",
   "scripts": {
@@ -20,9 +19,11 @@
   },
   "homepage": "https://github.com/alkemyTech/CFILP-Node-W2-Back-S2#readme",
   "dependencies": {
+    "axios": "^1.9.0",
     "bcryptjs": "^3.0.2",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "express-validator": "^7.2.1",
     "mysql2": "^3.14.1",
     "sequelize": "^6.37.7",
     "sequelize-cli": "^6.6.2",

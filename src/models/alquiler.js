@@ -1,23 +1,52 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
-  const Alquiler = sequelize.define('Alquiler', {
-    usuario_id: DataTypes.INTEGER,
-    ejemplar_id: DataTypes.INTEGER,
-    fecha_alquiler: DataTypes.DATE,
-    fecha_vencimiento: DataTypes.DATE,
-    fecha_devolucion: DataTypes.DATE,
+const { Model, DataTypes } = require('sequelize');
+
+module.exports = (sequelize) => {
+  class Alquiler extends Model {
+    static associate(models) {
+      Alquiler.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
+      Alquiler.belongsTo(models.Ejemplar, { foreignKey: 'ejemplar_id' });
+    }
+  }
+
+  Alquiler.init({
+    usuario_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      references: {
+        model: 'usuarios',
+        key: 'id'
+      }
+    },
+    ejemplar_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      references: {
+        model: 'ejemplares',
+        key: 'id'
+      }
+    },
+    fecha_alquiler: {
+      type: DataTypes.DATE
+    },
+    fecha_vencimiento: {
+      type: DataTypes.DATE
+    },
+    fecha_devolucion: {
+      type: DataTypes.DATE
+    },
     estado: {
       type: DataTypes.ENUM('pendiente', 'devuelto', 'atrasado')
-    }
+    },
+    created_at: DataTypes.DATE,
+    updated_at: DataTypes.DATE
   }, {
+    sequelize,
+    modelName: 'Alquiler',
     tableName: 'alquileres',
-    timestamps: true
+    underscored: true,
+    timestamps: true,
   });
-
-  Alquiler.associate = function(models) {
-    Alquiler.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
-    Alquiler.belongsTo(models.Ejemplar, { foreignKey: 'ejemplar_id' });
-  };
-
   return Alquiler;
 };

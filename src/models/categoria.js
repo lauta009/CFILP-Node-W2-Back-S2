@@ -1,12 +1,27 @@
-'use strict';
+const { Model, DataTypes } = require('sequelize');
 
-module.exports = (sequelize, DataTypes) => {
-  const Categoria = sequelize.define('Categoria', {
+module.exports = (sequelize) => {
+  class Categoria extends Model {
+    static associate(models) {
+      Categoria.belongsTo(models.Categoria, {
+        as: 'padre',
+        foreignKey: 'categoria_padre_id'
+      });
+      Categoria.hasMany(models.Categoria, {
+        as: 'subcategorias',
+        foreignKey: 'categoria_padre_id'
+      });
+    }
+  }
+  Categoria.init({
     nombre: DataTypes.STRING,
     categoria_padre_id: DataTypes.INTEGER
   }, {
+    sequelize,
+    modelName: 'Categoria',
     tableName: 'categorias',
-    timestamps: true
+    underscored: true,
+    timestamps: true,
   });
 
   Categoria.associate = function(models) {

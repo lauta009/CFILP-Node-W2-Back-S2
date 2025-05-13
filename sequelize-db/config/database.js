@@ -13,7 +13,6 @@ const sequelize = new Sequelize(
   }
 );
 
-// Función para sincronizar modelos
 const sync = async () => {
   try {
     await sequelize.sync({ force: false });
@@ -23,7 +22,4 @@ const sync = async () => {
   }
 };
 
-module.exports = {
-  sequelize,
-  sync
-};
+module.exports = { sequelize, sync };

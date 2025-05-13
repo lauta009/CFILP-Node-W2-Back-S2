@@ -1,28 +1,86 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
-  const Usuario = sequelize.define('Usuario', {
-    nombre: DataTypes.STRING,
-    apellido: DataTypes.STRING,
-    email: DataTypes.STRING,
-    password: DataTypes.STRING,
-    telefono: DataTypes.STRING,
-    direccion: DataTypes.STRING,
-    localidad: DataTypes.STRING,
-    ultimo_login: DataTypes.DATE,
-    estado: DataTypes.BOOLEAN
+const { Model, DataTypes } = require('sequelize');
+
+module.exports = (sequelize) => {
+  class Usuario extends Model {
+    static associate(models) {
+      
+      Usuario.hasMany(models.Alquiler, {
+        foreignKey: 'usuario_id',
+        as: 'alquileres',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      });
+
+      Usuario.belongsToMany(models.Rol, {
+        through: models.UsuarioRol,
+        foreignKey: 'usuario_id',
+        otherKey: 'rol_id',
+        as: 'roles',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      });
+    }
+  }
+
+  Usuario.init({
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    nombre: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    apellido: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      unique: true,
+    },
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    telefono: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    direccion: {
+      type: DataTypes.STRING(150),
+      allowNull: true,
+    },
+    localidad: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    ultimo_login: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    estado: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+    },
   }, {
     tableName: 'usuarios',
-    timestamps: true
+    underscored: true,
+    timestamps: true,
   });
-
-  Usuario.associate = function(models) {
-    Usuario.hasMany(models.Alquiler, { foreignKey: 'usuario_id' });
-    Usuario.belongsToMany(models.Rol, {
-      through: 'usuario_roles',
-      foreignKey: 'usuario_id',
-      otherKey: 'rol_id'
-    });
-  };
-
   return Usuario;
 };
+

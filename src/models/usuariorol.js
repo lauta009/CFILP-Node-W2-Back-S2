@@ -1,23 +1,31 @@
-'use strict';
-module.exports = (sequelize, DataTypes) => {
-  const UsuarioRol = sequelize.define('UsuarioRol', {
+const { Model, DataTypes } = require('sequelize');
+
+module.exports = (sequelize) => {
+  class UsuarioRol extends Model {
+    static associate(models) {
+      UsuarioRol.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
+      UsuarioRol.belongsTo(models.Rol, { foreignKey: 'rol_id' });
+    }
+  }
+
+  UsuarioRol.init({
     usuario_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      primaryKey: true
     },
     rol_id: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      primaryKey: true
     }
   }, {
+    sequelize,
+    modelName: 'UsuarioRol',
     tableName: 'usuario_roles',
-    timestamps: true  // tu tabla sí tiene created_at/updated_at
+    underscored: true,
+    timestamps: true  
   });
-
-  UsuarioRol.associate = function(models) {
-    UsuarioRol.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
-    UsuarioRol.belongsTo(models.Rol,     { foreignKey: 'rol_id' });
-  };
 
   return UsuarioRol;
 };

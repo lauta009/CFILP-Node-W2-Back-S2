@@ -1,20 +1,25 @@
-const express = require( 'express');
+const express = require('express');
 const dotenv = require('dotenv');
-const { sync } = require('../sequelize-db/config/database.js');
+const { sync } = require('../sequelize-db/config/database');
 const setupSwagger = require('../docs/swagger');
+const libroRoutes = require('./routes/libro.routes');
 
-dotenv.config(); // Cargar variables de entorno
+dotenv.config(); 
 
 const app = express();
 
-// Middlewares
+// Middlewares de aplicación
+app.use(express.urlencoded({ extended: true })); 
 app.use(express.json());
 
 // Rutas
+app.use('/api/libros', libroRoutes);
+
 
 // Manejador de errores
 
-//Documentacin con swagger
+
+// Documentación con swagger
 setupSwagger(app);
 
 // Sincronización con la bbdd y arranque del servidor
@@ -27,7 +32,3 @@ sync()
   .catch((err) => {
     console.error('❌ Error al sincronizar la base de datos:', err);
   });
-
-app.listen(3000, () => {
-  console.log('✅ Servidor corriendo en http://localhost:3000');
-});
