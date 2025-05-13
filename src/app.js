@@ -1,7 +1,7 @@
 const express = require( 'express');
 const dotenv = require('dotenv');
 const { sync } = require('../sequelize-db/config/database.js');
-const { setupSwagger } = require('../docs/swagger.js');
+const setupSwagger = require('../docs/swagger');
 
 dotenv.config(); // Cargar variables de entorno
 
