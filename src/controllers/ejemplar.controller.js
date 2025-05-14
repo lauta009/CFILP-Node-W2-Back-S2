@@ -1,4 +1,4 @@
-const ejemplaresService = require('../services/ejemplares.service');
+const ejemplaresService = require('../services/ejemplar.service');
 
 async function crear(req, res) {
   try {
