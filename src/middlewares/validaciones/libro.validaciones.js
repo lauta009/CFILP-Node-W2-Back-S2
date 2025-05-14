@@ -132,7 +132,7 @@ const crearLibroValidator = [
 ];
 
 const idLibroValidator = [
-  param('id')
+  body('id')
     .isInt({ min: 1 }).withMessage('ID inválido')
 ];
 
