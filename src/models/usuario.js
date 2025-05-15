@@ -77,6 +77,7 @@ module.exports = (sequelize) => {
       defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
     },
   }, {
+    sequelize,
     tableName: 'usuarios',
     underscored: true,
     timestamps: true,

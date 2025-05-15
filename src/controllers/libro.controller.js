@@ -68,6 +68,52 @@ const libroController = {
       console.error('Error al eliminar el libro:', error);
       res.status(500).json({ error: 'Error al eliminar el libro', detalles: error.message });
     }
+  },
+
+  //Metodos de  consultas con relación a ejemplares
+  async obtenerLibrosConEjemplares(req, res) {
+    try {
+      const librosConEjemplares = await libroService.obtenerLibrosConEjemplares();
+      res.status(200).json(librosConEjemplares);
+    } catch (error) {
+      res.status(500).json({ error: 'Error al obtener libros con sus ejemplares', detalles: error.message });
+    }
+  },
+
+  async obtenerLibrosConEjemplaresDisponibles(req, res) {
+    try {
+      const librosDisponibles = await libroService.obtenerLibrosConEjemplaresPorEstado('disponible');
+      res.status(200).json(librosDisponibles);
+    } catch (error) {
+      res.status(500).json({ error: 'Error al obtener libros con ejemplares disponibles', detalles: error.message });
+    }
+  },
+
+  async obtenerLibrosConEjemplaresPrestados(req, res) {
+    try {
+      const librosPrestados = await libroService.obtenerLibrosConEjemplaresPorEstado('prestado');
+      res.status(200).json(librosPrestados);
+    } catch (error) {
+      res.status(500).json({ error: 'Error al obtener libros con ejemplares prestados', detalles: error.message });
+    }
+  },
+
+  async obtenerLibrosConEjemplaresEnReparacion(req, res) {
+    try {
+      const librosEnReparacion = await libroService.obtenerLibrosConEjemplaresPorEstado('reparacion');
+      res.status(200).json(librosEnReparacion);
+    } catch (error) {
+      res.status(500).json({ error: 'Error al obtener libros con ejemplares en reparación', detalles: error.message });
+    }
+  },
+
+  async obtenerLibrosConEjemplaresBaja(req, res) {
+    try {
+      const librosBaja = await libroService.obtenerLibrosConEjemplaresPorEstado('baja');
+      res.status(200).json(librosBaja);
+    } catch (error) {
+      res.status(500).json({ error: 'Error al obtener libros con ejemplares en baja', detalles: error.message });
+    }
   }
 };
 

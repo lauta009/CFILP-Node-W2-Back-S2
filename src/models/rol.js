@@ -21,6 +21,7 @@ module.exports = (sequelize) => {
     created_at: DataTypes.DATE,
     updated_at: DataTypes.DATE
   }, {
+    sequelize,
     tableName: 'roles',
     underscored: true
   });

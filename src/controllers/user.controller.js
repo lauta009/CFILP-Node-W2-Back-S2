@@ -1,4 +1,4 @@
-const usuarioService = require('../services/userService');
+const usuarioService = require('../services/user.service');
 
 const getAll = async (req, res) => {
   try {

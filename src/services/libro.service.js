@@ -1,9 +1,10 @@
 const { Libro, Autor, Categoria, Editorial, Ejemplar } = require('../models');
 const { validarISBNconOpenLibrary } = require('../utils/externalApis');
 const { Op } = require('sequelize');
+const sequelize = require('sequelize');
  
 // Para obtener o crear una entidad (Autor, Categoria, Editorial) en la base de datos
-// Si el valor es un número, busca por ID. Si es una cadena, busca por nombre y crea si no existe.
+// Si el valor es un número, busca por ID. Si es un string, busca por nombre y lo crea si no existe.
 async function obtenerOcrearEntidad(Modelo, valor, campo = 'nombre') {
   if (!valor) {
     return null; 
@@ -22,7 +23,7 @@ async function obtenerOcrearEntidad(Modelo, valor, campo = 'nombre') {
 }
 
 // Para obtener o crear autores
-// Si el valor es un número, busca por ID. Si es una cadena, busca por nombre y crea si no existe.
+// Si el valor es un número, busca por ID. Si es un string, busca por nombre y crea si no existe.
 async function obtenerAutores(autoresInput) {
   if (!autoresInput || !Array.isArray(autoresInput) || autoresInput.length === 0) {
     return [];
@@ -102,7 +103,6 @@ async function crearLibro(datos) {
     include: ['categoria', 'editorial', 'autores']
   });
 }
-
 
 async function listarLibros({ categoria, editorial, autor, page = 1, limit = 10, detalle = 'completo' }) {
   const offset = (parseInt(page) - 1) * parseInt(limit);
@@ -224,10 +224,50 @@ const eliminarLibro = async (id) => {
   await libro.destroy();
 };
 
+async function obtenerLibrosConEjemplares() {
+  try {
+    const libros = await Libro.findAll({
+      attributes: ['id', 'titulo', 'isbn'],
+      include: [{
+        model: Ejemplar,
+        as: 'ejemplares',
+        attributes: ['codigo_barra', 'estado']
+      }]
+    });
+    return libros;
+  } catch (error) {
+    console.error('Error al obtener libros con sus ejemplares:', error);
+    throw error;
+  }
+}
+
+async function obtenerLibrosConEjemplaresPorEstado(estado) {
+  try {
+    const librosConCantidad = await Libro.findAll({
+      attributes: ['id', 'titulo', 'isbn', [sequelize.fn('COUNT', sequelize.col('ejemplares.id')), 'cantidad']],
+      include: [{
+        model: Ejemplar,
+        as: 'ejemplares',
+        attributes: [],
+        where: { estado: estado }
+      }],
+      group: ['Libro.id'],
+      having: sequelize.literal('COUNT(ejemplares.id) > 0') 
+    });
+    return librosConCantidad;
+  } catch (error) {
+    console.error(`Error al obtener libros con ejemplares en estado ${estado}:`, error);
+    throw error;
+  }
+}
+
+
 module.exports = {
   crearLibro,
   listarLibros,
   obtenerLibroPorId,
   actualizarLibro,
-  eliminarLibro
+  eliminarLibro,
+  obtenerLibrosConEjemplares,
+  obtenerLibrosConEjemplaresPorEstado,
 };

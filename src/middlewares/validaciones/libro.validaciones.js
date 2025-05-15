@@ -1,4 +1,4 @@
-const { body } = require('express-validator');
+const { body, param } = require('express-validator');
 const { Autor, Categoria, Editorial } = require('../../models');
 const { validarISBNconOpenLibrary } = require('../../utils/externalApis');
 
@@ -51,11 +51,7 @@ const crearLibroValidator = [
     .isString()
     .isLength({ max: 255 }),
 
-  // Validar que al menos uno de editorial_id o editorial esté presente si se quiere especificar una editorial
-  body(['editorial_id', 'editorial'])
-    .if((value, { req }) => !req.body.editorial_id && !req.body.editorial)
-    .optional(), 
-
+  
   body('categoria_id')
     .optional({ checkFalsy: true })
     .custom(async (value) => {
@@ -75,10 +71,6 @@ const crearLibroValidator = [
     .optional({ checkFalsy: true })
     .isString()
     .isLength({ max: 255 }),
-
-  body(['categoria_id', 'categoria'])
-    .if((value, { req }) => !req.body.categoria_id && !req.body.categoria)
-    .optional(),
 
   body('fecha_publicacion')
     .optional({ checkFalsy: true })
@@ -132,8 +124,8 @@ const crearLibroValidator = [
 ];
 
 const idLibroValidator = [
-  body('id')
-    .isInt({ min: 1 }).withMessage('ID inválido')
+  param('id')
+    .isInt({ min: 1 }).withMessage('ID del libro inválido')
 ];
 
 module.exports = {
