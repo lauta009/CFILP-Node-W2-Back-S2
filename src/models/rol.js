@@ -3,8 +3,7 @@ const { Model, DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
   class Rol extends Model {
     static associate(models) {
-      Rol.belongsToMany(models.Usuario, {
-        through: models.UsuarioRol,
+      Rol.hasMany(models.Usuario, {
         foreignKey: 'rol_id',
         as: 'usuarios'
       });
@@ -21,6 +20,8 @@ module.exports = (sequelize) => {
     created_at: DataTypes.DATE,
     updated_at: DataTypes.DATE
   }, {
+    sequelize,
+    modelName: 'Rol',
     tableName: 'roles',
     underscored: true
   });

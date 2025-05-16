@@ -51,6 +51,8 @@ module.exports = (sequelize) => {
     es_premium: DataTypes.BOOLEAN,
     categoria_id: DataTypes.INTEGER
   }, {
+    sequelize,
+    modelName: 'Libro',
     tableName: 'libros',
     underscored: true,
     timestamps: true,

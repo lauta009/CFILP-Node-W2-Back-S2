@@ -1,4 +1,4 @@
-const { body } = require('express-validator');
+const { body, param } = require('express-validator');
 const { Autor, Categoria, Editorial } = require('../../models');
 const { validarISBNconOpenLibrary } = require('../../utils/externalApis');
 

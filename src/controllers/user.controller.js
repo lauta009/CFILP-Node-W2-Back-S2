@@ -1,4 +1,4 @@
-const usuarioService = require('../services/userService');
+const usuarioService = require('../services/user.service');
 
 const getAll = async (req, res) => {
   try {
@@ -22,9 +22,9 @@ const getById = async (req, res) => {
 const create = async (req, res) => {
   try {
     const nuevoUsuario = await usuarioService.createUsuario(req.body);
-    res.status(201).json(nuevoUsuario);
+    res.status(201).json('Usuario creado correctamente: ' + nuevoUsuario);
   } catch (err) {
-    res.status(500).json({ error: 'Error al crear el usuario' });
+    res.status(500).json({ error: 'Error al crear el usuario', err: err.message });
   }
 };
 

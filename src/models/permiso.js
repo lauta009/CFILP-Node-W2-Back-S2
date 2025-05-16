@@ -6,6 +6,7 @@ module.exports = (sequelize) => {
       Permiso.belongsToMany(models.Rol, {
         through: models.RolPermiso,
         foreignKey: 'permiso_id',
+        otherKey: 'rol_id',
         as: 'roles'
       });
     }
@@ -16,6 +17,8 @@ module.exports = (sequelize) => {
     created_at: DataTypes.DATE,
     updated_at: DataTypes.DATE
   }, {
+    sequelize,
+    modelName: 'Permiso',
     tableName: 'permisos',
     underscored: true,  
     timestamps: true,
