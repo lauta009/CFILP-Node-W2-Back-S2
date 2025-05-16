@@ -11,13 +11,9 @@ module.exports = (sequelize) => {
         onUpdate: 'CASCADE',
       });
 
-      Usuario.belongsToMany(models.Rol, {
-        through: models.UsuarioRol,
-        foreignKey: 'usuario_id',
-        otherKey: 'rol_id',
-        as: 'roles',
-        onDelete: 'CASCADE',
-        onUpdate: 'CASCADE',
+      Usuario.belongsTo(models.Rol, {
+        foreignKey: 'rol_id',
+        as: 'rol'
       });
     }
   }
@@ -44,6 +40,16 @@ module.exports = (sequelize) => {
     password: {
       type: DataTypes.STRING(255),
       allowNull: false,
+    },
+    rol_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'roles',
+        key: 'id'
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'RESTRICT'
     },
     telefono: {
       type: DataTypes.STRING(20),
@@ -77,6 +83,8 @@ module.exports = (sequelize) => {
       defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
     },
   }, {
+    sequelize,
+    modelName: 'Usuario',
     tableName: 'usuarios',
     underscored: true,
     timestamps: true,

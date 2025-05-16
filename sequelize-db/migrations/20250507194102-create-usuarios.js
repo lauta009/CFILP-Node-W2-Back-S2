@@ -16,6 +16,16 @@ module.exports = {
         unique: true,
       },
       password: Sequelize.STRING(255),
+      rol_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'roles',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'RESTRICT'
+      },
       telefono: Sequelize.STRING(20),
       direccion: Sequelize.STRING(150),
       localidad: Sequelize.STRING(100),

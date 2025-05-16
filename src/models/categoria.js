@@ -11,6 +11,9 @@ module.exports = (sequelize) => {
         as: 'subcategorias',
         foreignKey: 'categoria_padre_id'
       });
+      Categoria.hasMany(models.Libro, {
+        foreignKey: 'categoria_id'
+      });
     }
   }
   Categoria.init({
@@ -24,19 +27,6 @@ module.exports = (sequelize) => {
     timestamps: true,
   });
 
-  Categoria.associate = function(models) {
-    Categoria.belongsTo(models.Categoria, {
-      as: 'padre',
-      foreignKey: 'categoria_padre_id'
-    });
-    Categoria.hasMany(models.Categoria, {
-      as: 'hijas',
-      foreignKey: 'categoria_padre_id'
-    });
-    Categoria.hasMany(models.Libro, {
-      foreignKey: 'categoria_id'
-    });
-  };
 
   return Categoria;
 };
