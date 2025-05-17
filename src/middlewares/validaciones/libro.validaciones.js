@@ -1,4 +1,4 @@
-const { body, param } = require('express-validator');
+const { body, param, query } = require('express-validator');
 const { Autor, Categoria, Editorial } = require('../../models');
 const { validarISBNconOpenLibrary } = require('../../utils/externalApis');
 
@@ -25,11 +25,11 @@ const validarAutor = async (autor) => {
   return true;
 };
 
-
 const crearLibroValidator = [
   body('titulo')
     .notEmpty().withMessage('El título es obligatorio')
-    .isLength({ max: 150 }),
+    .isLength({ max: 150 }).withMessage('El título no puede tener más de 150 caracteres')
+    .isString().withMessage('El título debe ser una cadena de texto'),
 
   body('editorial_id')
     .optional({ checkFalsy: true })
@@ -123,12 +123,52 @@ const crearLibroValidator = [
     }),
 ];
 
+const listarLibrosValidator = [
+  query('limit')
+    .optional()
+    .isInt({ min: 1 }).withMessage('El límite debe ser un número entero positivo'),
+
+  query('offset')
+    .optional()
+    .isInt({ min: 0 }).withMessage('El offset debe ser un número entero no negativo'),
+
+  query('page')
+    .optional()
+    .isInt({ min: 1 }).withMessage('La página debe ser un número entero positivo'),
+
+  query('categoria')
+    .optional()
+    .isString().withMessage('La categoría debe ser una cadena de texto'),
+
+  query('editorial')
+    .optional()
+    .isString().withMessage('La editorial debe ser una cadena de texto'),
+
+  query('autor')
+    .optional()
+    .isString().withMessage('El autor debe ser una cadena de texto'),
+
+  query('detalle')
+    .optional()
+    .isIn(['completo', 'basico']).withMessage('El detalle debe ser "completo" o "basico"'),
+];
+
 const idLibroValidator = [
   param('id')
     .isInt({ min: 1 }).withMessage('ID del libro inválido')
 ];
 
+const estadoValidator = [
+  param('estado')
+    .optional()
+    .isString().withMessage('El estado debe ser una cadena de texto')
+    .isIn(['disponible', 'prestado', 'reparacion', 'baja'])
+    .withMessage('El estado debe ser uno de: disponible, prestado, reparacion, baja'),  
+];
+
 module.exports = {
   crearLibroValidator,
-  idLibroValidator
+  idLibroValidator,
+  listarLibrosValidator,
+  estadoValidator,
 };

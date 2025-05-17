@@ -3,7 +3,6 @@ const { Model, DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
   class Usuario extends Model {
     static associate(models) {
-      
       Usuario.hasMany(models.Alquiler, {
         foreignKey: 'usuario_id',
         as: 'alquileres',
@@ -11,12 +10,10 @@ module.exports = (sequelize) => {
         onUpdate: 'CASCADE',
       });
 
-      Usuario.belongsToMany(models.Rol, {
-        through: models.UsuarioRol,
-        foreignKey: 'usuario_id',
-        otherKey: 'rol_id',
-        as: 'roles',
-        onDelete: 'CASCADE',
+      Usuario.belongsTo(models.Rol, {
+        foreignKey: 'rol_id',
+        as: 'rol',
+        onDelete: 'SET NULL',
         onUpdate: 'CASCADE',
       });
     }
@@ -66,6 +63,14 @@ module.exports = (sequelize) => {
       allowNull: false,
       defaultValue: true,
     },
+    rol_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'roles',
+        key: 'id',
+      },
+    },
     created_at: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -78,10 +83,11 @@ module.exports = (sequelize) => {
     },
   }, {
     sequelize,
+    modelName: 'Usuario',
     tableName: 'usuarios',
     underscored: true,
     timestamps: true,
   });
+
   return Usuario;
 };
-

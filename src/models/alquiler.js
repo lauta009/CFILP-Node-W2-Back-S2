@@ -3,8 +3,8 @@ const { Model, DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
   class Alquiler extends Model {
     static associate(models) {
-      Alquiler.belongsTo(models.Usuario, { foreignKey: 'usuario_id' });
-      Alquiler.belongsTo(models.Ejemplar, { foreignKey: 'ejemplar_id' });
+      Alquiler.belongsTo(models.Usuario, { foreignKey: 'usuario_id', as: 'usuario' });
+      Alquiler.belongsTo(models.Ejemplar, { foreignKey: 'ejemplar_id', as: 'ejemplar' });
     }
   }
 

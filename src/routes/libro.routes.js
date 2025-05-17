@@ -3,11 +3,16 @@ const router = express.Router();
 
 const libroController = require('../Controllers/libro.controller');
 
-const { crearLibroValidator, idLibroValidator } = require('../middlewares/validaciones/libro.validaciones');
+const { crearLibroValidator, idLibroValidator, listarLibrosValidator, estadoValidator } = require('../middlewares/validaciones/libro.validaciones');
 const validarErrores = require('../middlewares/validaciones/validarErrores');
 
 //Rutas basicas del CRUD de libros
-router.get('/', libroController.listar);
+
+router.get(
+  '/', 
+  listarLibrosValidator,
+  validarErrores,
+  libroController.listar);
 
 router.get('/obtener-uno/:id',
   idLibroValidator,
@@ -36,10 +41,13 @@ router.delete('/:id',
 );
 
 // Rutas para obtener libros y ejemplares
-router.get('/libros-con-ejemplares', libroController.obtenerLibrosConEjemplares);
-router.get('/libros-disponibles', libroController.obtenerLibrosConEjemplaresDisponibles);
-router.get('/libros-prestados', libroController.obtenerLibrosConEjemplaresPrestados);
-router.get('/libros-en-reparacion', libroController.obtenerLibrosConEjemplaresEnReparacion);
-router.get('/libros-en-baja', libroController.obtenerLibrosConEjemplaresBaja);
+router.get('/metricas', libroController.obtenerMetricasLibros);
+router.get('/ejemplares', libroController.obtenerLibrosConEjemplares);
+router.get('/ejemplares/:estado', estadoValidator, validarErrores, libroController.obtenerLibrosConEjemplaresPorEstado);
+
+// Rutas para obtener libros más alquilados
+router.get('/mas-alquilados/historico', libroController.obtenerLibrosMasAlquiladosHistorico);
+
 
 module.exports = router;
+

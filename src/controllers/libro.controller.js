@@ -20,8 +20,8 @@ const libroController = {
       const { categoria, editorial, autor, page, limit, detalle } = req.query;
       const params = {
         categoria: categoria ?? null,
-        editorial: editorial ?? undefined,
-        autor: autor ?? undefined,
+        editorial: editorial ?? null,
+        autor: autor ?? null,
         page: page ?? 1,
         limit: limit ?? 10,
         detalle: detalle ?? 'completo', 
@@ -70,7 +70,16 @@ const libroController = {
     }
   },
 
-  //Metodos de  consultas con relación a ejemplares
+  //Metodos de  consultas con relación a ejemplares y alquileres
+  async obtenerMetricasLibros(req, res) {
+    try {
+      const metricas = await libroService.obtenerMetricasLibros();
+      res.status(200).json(metricas);
+    } catch (error) {
+      res.status(500).json({ error: 'Error al obtener las métricas de libros', detalles: error.message });
+    }
+  },
+
   async obtenerLibrosConEjemplares(req, res) {
     try {
       const librosConEjemplares = await libroService.obtenerLibrosConEjemplares();
@@ -80,41 +89,24 @@ const libroController = {
     }
   },
 
-  async obtenerLibrosConEjemplaresDisponibles(req, res) {
+  async obtenerLibrosConEjemplaresPorEstado(req, res) {
+    const estado = req.params.estado ?? 'disponible'; 
     try {
-      const librosDisponibles = await libroService.obtenerLibrosConEjemplaresPorEstado('disponible');
-      res.status(200).json(librosDisponibles);
+      const librosPorEstado = await libroService.obtenerLibrosConEjemplaresPorEstado(estado);
+      res.status(200).json(librosPorEstado);
     } catch (error) {
-      res.status(500).json({ error: 'Error al obtener libros con ejemplares disponibles', detalles: error.message });
+      res.status(500).json({ error: `Error al obtener libros con ejemplares ${estado}`, detalles: error.message });
     }
   },
 
-  async obtenerLibrosConEjemplaresPrestados(req, res) {
+  async obtenerLibrosMasAlquiladosHistorico(req, res) {
     try {
-      const librosPrestados = await libroService.obtenerLibrosConEjemplaresPorEstado('prestado');
-      res.status(200).json(librosPrestados);
+      const librosMasAlquilados = await libroService.obtenerLibrosMasAlquiladosHistorico();
+      res.status(200).json(librosMasAlquilados);
     } catch (error) {
-      res.status(500).json({ error: 'Error al obtener libros con ejemplares prestados', detalles: error.message });
+      res.status(500).json({ error: 'Error al obtener los libros más alquilados históricamente', detalles: error.message });
     }
   },
-
-  async obtenerLibrosConEjemplaresEnReparacion(req, res) {
-    try {
-      const librosEnReparacion = await libroService.obtenerLibrosConEjemplaresPorEstado('reparacion');
-      res.status(200).json(librosEnReparacion);
-    } catch (error) {
-      res.status(500).json({ error: 'Error al obtener libros con ejemplares en reparación', detalles: error.message });
-    }
-  },
-
-  async obtenerLibrosConEjemplaresBaja(req, res) {
-    try {
-      const librosBaja = await libroService.obtenerLibrosConEjemplaresPorEstado('baja');
-      res.status(200).json(librosBaja);
-    } catch (error) {
-      res.status(500).json({ error: 'Error al obtener libros con ejemplares en baja', detalles: error.message });
-    }
-  }
 };
 
 module.exports = libroController;

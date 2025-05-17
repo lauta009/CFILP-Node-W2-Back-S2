@@ -34,12 +34,11 @@ module.exports = (sequelize) => {
       type: DataTypes.ENUM('disponible', 'prestado', 'reparacion', 'baja'),
       allowNull: false
     },
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Ejemplar',
     tableName: 'ejemplares',
+    timestamps: true,
     underscored: true
   });
 
