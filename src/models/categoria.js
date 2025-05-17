@@ -11,6 +11,10 @@ module.exports = (sequelize) => {
         as: 'subcategorias',
         foreignKey: 'categoria_padre_id'
       });
+      Categoria.hasMany(models.Libro, {
+        foreignKey: 'categoria_id',
+        as: 'libros'
+      });
     }
   }
   Categoria.init({

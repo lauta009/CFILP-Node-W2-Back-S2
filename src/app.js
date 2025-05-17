@@ -6,6 +6,7 @@ const libroRoutes = require('./routes/libro.routes');
 const userRoutes = require('./routes/user.routes');
 const ejemplarRoutes = require('./routes/ejemplar.routes');
 const alquilerRoutes = require('./routes/alquiler.routes');
+const categoriaRoutes = require('./routes/categoria.routes');
 
 dotenv.config(); 
 
@@ -20,6 +21,8 @@ app.use('/api/libros', libroRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/ejemplares', ejemplarRoutes);
 app.use('/api/alquileres', alquilerRoutes);
+app.use('/api/categorias', categoriaRoutes);
+
 
 
 // Manejador de errores
