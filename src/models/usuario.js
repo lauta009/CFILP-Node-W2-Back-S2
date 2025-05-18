@@ -3,7 +3,6 @@ const { Model, DataTypes } = require('sequelize');
 module.exports = (sequelize) => {
   class Usuario extends Model {
     static associate(models) {
-      
       Usuario.hasMany(models.Alquiler, {
         foreignKey: 'usuario_id',
         as: 'alquileres',
@@ -79,6 +78,14 @@ module.exports = (sequelize) => {
       allowNull: false,
       defaultValue: true,
     },
+    rol_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'roles',
+        key: 'id',
+      },
+    },
     created_at: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -92,10 +99,12 @@ module.exports = (sequelize) => {
   }, {
     sequelize,
     modelName: 'Usuario',
+    sequelize,
+    modelName: 'Usuario',
     tableName: 'usuarios',
     underscored: true,
     timestamps: true,
   });
+
   return Usuario;
 };
-

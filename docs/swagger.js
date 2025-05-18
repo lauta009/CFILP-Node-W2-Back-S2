@@ -1,16 +1,21 @@
 const swaggerJSDoc = require('swagger-jsdoc');
-const { serve, setup } = require('swagger-ui-express');
+const swaggerUi = require('swagger-ui-express');
 
 const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Biblioteca API - Squad 2',
+      title: 'API de Biblioteca',
       version: '1.0.0',
-      description: 'Documentación de la API REST para gestión de biblioteca',
+      description: 'Documentación de la API de gestión de biblioteca Squad 2 - Try-Catch-Me',
     },
+    servers: [
+      {
+        url: 'http://localhost:3000',
+      },
+    ],
   },
-  apis: ['./src/routes/*.js'], // Comentarios con Swagger van ahí
+  apis: ['./src/routes/*.js'], 
 };
 
 const swaggerSpec = swaggerJSDoc(options);

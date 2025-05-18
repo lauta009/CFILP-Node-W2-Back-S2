@@ -27,6 +27,23 @@ async function obtenerEjemplarPorId(id) {
   }
 }
 
+async function obtenerEjemplarPorCodigoBarra(codigoBarra) {
+  try {
+    const ejemplar = await Ejemplar.findOne({
+      where: { codigo_barra: codigoBarra },
+      include: [{
+        model: Libro,
+        as: 'libro',
+        attributes: ['id', 'titulo', 'isbn']
+      }]
+    });
+    return ejemplar;
+  } catch (error) {
+    console.error('Error al obtener ejemplar por código de barra:', error);
+    throw error;
+  }
+}
+
 async function obtenerTodosLosEjemplares(query) {
   try {
     const { limit = 10, offset = 0, libro_id, codigo_barra, estado } = query;
@@ -36,7 +53,7 @@ async function obtenerTodosLosEjemplares(query) {
       where.libro_id = libro_id;
     }
     if (codigo_barra) {
-      where.codigo_barra = { [Op.like]: `%${codigo_barra}%` }; // Necesitas importar Op desde Sequelize
+      where.codigo_barra = codigo_barra;
     }
     if (estado) {
       where.estado = estado;
@@ -99,6 +116,7 @@ async function eliminarEjemplar(id) {
 }
 
 module.exports = {
+  obtenerEjemplarPorCodigoBarra,
   crearEjemplar,
   obtenerEjemplarPorId,
   obtenerTodosLosEjemplares,

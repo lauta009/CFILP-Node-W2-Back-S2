@@ -1,7 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const { sync } = require('../sequelize-db/config/database');
-const setupSwagger = require('../docs/swagger');
+//const setupSwagger = require('../docs/swagger');
 const libroRoutes = require('./routes/libro.routes');
 const userRoutes = require('./routes/user.routes');
 
@@ -10,6 +10,8 @@ const mi_perfilRoutes = require('./routes/mi_perfil.routes');
 
 const {authMiddleware, permisosCheck} = require('./middlewares/auth.middleware');
 const ejemplarRoutes = require('./routes/ejemplar.routes');
+const alquilerRoutes = require('./routes/alquiler.routes');
+const categoriaRoutes = require('./routes/categoria.routes');
 const { sequelize } = require('../sequelize-db/config/database');
 
 dotenv.config(); 

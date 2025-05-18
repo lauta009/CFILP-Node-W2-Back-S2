@@ -20,8 +20,8 @@ const libroController = {
       const { categoria, editorial, autor, page, limit, detalle } = req.query;
       const params = {
         categoria: categoria ?? null,
-        editorial: editorial ?? undefined,
-        autor: autor ?? undefined,
+        editorial: editorial ?? null,
+        autor: autor ?? null,
         page: page ?? 1,
         limit: limit ?? 10,
         detalle: detalle ?? 'completo', 
@@ -68,7 +68,45 @@ const libroController = {
       console.error('Error al eliminar el libro:', error);
       res.status(500).json({ error: 'Error al eliminar el libro', detalles: error.message });
     }
-  }
+  },
+
+  //Metodos de  consultas con relación a ejemplares y alquileres
+  async obtenerMetricasLibros(req, res) {
+    try {
+      const metricas = await libroService.obtenerMetricasLibros();
+      res.status(200).json(metricas);
+    } catch (error) {
+      res.status(500).json({ error: 'Error al obtener las métricas de libros', detalles: error.message });
+    }
+  },
+
+  async obtenerLibrosConEjemplares(req, res) {
+    try {
+      const librosConEjemplares = await libroService.obtenerLibrosConEjemplares();
+      res.status(200).json(librosConEjemplares);
+    } catch (error) {
+      res.status(500).json({ error: 'Error al obtener libros con sus ejemplares', detalles: error.message });
+    }
+  },
+
+  async obtenerLibrosConEjemplaresPorEstado(req, res) {
+    const estado = req.params.estado ?? 'disponible'; 
+    try {
+      const librosPorEstado = await libroService.obtenerLibrosConEjemplaresPorEstado(estado);
+      res.status(200).json(librosPorEstado);
+    } catch (error) {
+      res.status(500).json({ error: `Error al obtener libros con ejemplares ${estado}`, detalles: error.message });
+    }
+  },
+
+  async obtenerLibrosMasAlquiladosHistorico(req, res) {
+    try {
+      const librosMasAlquilados = await libroService.obtenerLibrosMasAlquiladosHistorico();
+      res.status(200).json(librosMasAlquilados);
+    } catch (error) {
+      res.status(500).json({ error: 'Error al obtener los libros más alquilados históricamente', detalles: error.message });
+    }
+  },
 };
 
 module.exports = libroController;
