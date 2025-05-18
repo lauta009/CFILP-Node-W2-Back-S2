@@ -39,6 +39,8 @@ module.exports = {
       created_at: Sequelize.DATE,
       updated_at: Sequelize.DATE,
     });
+
+    await queryInterface.addIndex('alquileres', ['fecha_vencimiento', 'estado']);
   },
 
   async down(queryInterface, Sequelize) {

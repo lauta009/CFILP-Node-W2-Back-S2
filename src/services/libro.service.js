@@ -122,6 +122,19 @@ function _formatearLibroCompleto(libro) {
   };
 }
 
+// Funciones auxiliares generales
+function _construirWhereDeLaBusqueda(queryParam) {
+  const where = {};
+  if (queryParam.titulo) {
+    where.titulo = { [Op.iLike]: `%${queryParam.titulo}%` };
+  }
+  if (queryParam.saga) {
+    where.saga_coleccion = { [Op.iLike]: `%${queryParam.saga}%` };
+  }
+  return where;
+};
+
+
 // Funciones principales
 async function listarLibros({ categoria, editorial, autor, page = 1, limit = 10, detalle = 'completo' }) {
   const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
@@ -183,10 +196,19 @@ const obtenerLibroPorId = async (id) => {
   });
 };
 
+const buscarLibrosPorCondicion = async (queryParam) => {
+  const whereClause = _construirWhereDeLaBusqueda(queryParam);
+  return await Libro.findAll({
+    where: whereClause,
+    include: ['categoria', 'editorial', 'autores'], 
+  });
+};
+
 async function crearLibro(datos) {
   const {
     titulo,
     fecha_publicacion,
+    saga_coleccion,
     isbn,
     resumen,
     portada_url,
@@ -202,7 +224,7 @@ async function crearLibro(datos) {
 
   if (isbn) {
     await validarISBNconOpenLibrary(isbn);
-    await _verificarISBNenLaDb(isbn); 
+    await _verificarISBNenLaDb(isbn);
   }
 
   const categoriaFinal = await _obtenerOcrearEntidad(Categoria, categoria_id || categoria);
@@ -212,14 +234,15 @@ async function crearLibro(datos) {
   const nuevoLibro = await Libro.create({
     titulo,
     fecha_publicacion,
+    saga_coleccion,
     isbn,
     resumen,
     portada_url,
     idioma,
     nro_paginas,
     es_premium,
-    categoria_id: categoriaFinal ? categoriaFinal.id : null, 
-    editorial_id: editorialFinal ? editorialFinal.id : null 
+    categoria_id: categoriaFinal ? categoriaFinal.id : null,
+    editorial_id: editorialFinal ? editorialFinal.id : null,
   });
 
   await nuevoLibro.setAutores(autoresFinal);
@@ -369,6 +392,7 @@ module.exports = {
   crearLibro,
   listarLibros,
   obtenerLibroPorId,
+  buscarLibrosPorCondicion,
   actualizarLibro,
   eliminarLibro,
   obtenerMetricasLibros,

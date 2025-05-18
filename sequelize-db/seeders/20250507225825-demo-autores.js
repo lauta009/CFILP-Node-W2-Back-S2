@@ -18,6 +18,14 @@ module.exports = {
       { id: 13, nombre: 'Juan', apellido: 'Pérez', created_at: new Date(), updated_at: new Date() },
       { id: 14, nombre: 'Ana', apellido: 'González', created_at: new Date(), updated_at: new Date() },
       { id: 15, nombre: 'Lucía', apellido: 'Martínez', created_at: new Date(), updated_at: new Date() },
+      { id: 16, nombre: 'George', apellido: 'Orwell', created_at: new Date(), updated_at: new Date() },
+      { id: 17, nombre: 'Roberto', apellido: 'Bolaño', created_at: new Date(), updated_at: new Date() },
+      { id: 18, nombre: 'Ray', apellido: 'Bradbury', created_at: new Date(), updated_at: new Date() },
+      { id: 19, nombre: 'Miguel de', apellido: 'Cervantes', created_at: new Date(), updated_at: new Date() },
+      { id: 20, nombre: 'José', apellido: 'Saramago', created_at: new Date(), updated_at: new Date() },
+      { id: 21, nombre: 'Umberto', apellido: 'Eco', created_at: new Date(), updated_at: new Date() },
+      { id: 22, nombre: 'J.R.R.', apellido: 'Tolkien', created_at: new Date(), updated_at: new Date() },
+      { id: 24, nombre: 'John', apellido: 'Katzenbach', created_at: new Date(), updated_at: new Date() },
     ]);
   },
 

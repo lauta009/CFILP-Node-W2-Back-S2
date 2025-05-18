@@ -18,8 +18,20 @@ module.exports = (sequelize) => {
     }
   }
   Categoria.init({
-    nombre: DataTypes.STRING,
-    categoria_padre_id: DataTypes.INTEGER
+    nombre:{
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    categoria_padre_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'categorias',
+        key: 'id'
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
+    }
   }, {
     sequelize,
     modelName: 'Categoria',

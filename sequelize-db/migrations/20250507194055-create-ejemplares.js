@@ -32,6 +32,8 @@ module.exports = {
       created_at: Sequelize.DATE,
       updated_at: Sequelize.DATE,
     });
+
+    await queryInterface.addIndex('ejemplares', ['libro_id', 'estado']);
   },
 
   async down(queryInterface, Sequelize) {

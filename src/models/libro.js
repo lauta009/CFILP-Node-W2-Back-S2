@@ -31,32 +31,73 @@ module.exports = (sequelize) => {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
     },
     titulo: {
       type: DataTypes.STRING(150),
-      allowNull: false
+      allowNull: false,
     },
     editorial_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'editoriales',
-        key: 'id'
-      }
+        key: 'id',
+      },
     },
-    fecha_publicacion: DataTypes.DATE,
-    isbn: DataTypes.STRING,
-    cantidad_total: DataTypes.INTEGER,
-    es_premium: DataTypes.BOOLEAN,
-    categoria_id: DataTypes.INTEGER
+    saga_coleccion: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    fecha_publicacion: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    isbn: {
+      type: DataTypes.STRING(17),
+      unique: true,
+      allowNull: false,
+    },
+    resumen: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    portada_url: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    idioma: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    nro_paginas: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    es_premium: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
+      defaultValue: false,
+    },
+    categoria_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'categorias',
+        key: 'id',
+      },
+    }
   }, {
     sequelize,
     modelName: 'Libro',
     tableName: 'libros',
     underscored: true,
-    timestamps: true,
+    timestamps: true, 
+    indexes: [
+      {
+        fields: ['titulo', 'isbn', 'es_premium'],
+      },
+    ],
   });
-  
   return Libro;
 };

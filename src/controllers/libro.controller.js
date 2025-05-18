@@ -48,6 +48,16 @@ const libroController = {
     }
   },
 
+  async buscarLibrosController(req, res) {
+    try {
+      const { titulo, saga } = req.query;
+      const resultados = await libroService.buscarLibros({ titulo, saga });
+      res.status(200).json(resultados);
+    } catch (error) {
+      console.error('Error al buscar libros:', error);
+      res.status(500).json({ error: 'No se pudieron buscar los libros' });
+    }
+  },
 
   async actualizar(req, res) {
     try {

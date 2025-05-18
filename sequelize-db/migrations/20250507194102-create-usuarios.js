@@ -36,6 +36,8 @@ module.exports = {
       created_at: Sequelize.DATE,
       updated_at: Sequelize.DATE,
     });
+
+    await queryInterface.addIndex('usuarios', ['email']);
   },
 
   async down(queryInterface, Sequelize) {

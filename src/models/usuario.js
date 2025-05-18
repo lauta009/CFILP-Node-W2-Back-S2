@@ -69,6 +69,10 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(100),
       allowNull: true,
     },
+    codigo_postal: {
+      type: DataTypes.STRING(10),
+      allowNull: true,
+    },	
     ultimo_login: {
       type: DataTypes.DATE,
       allowNull: true,
@@ -77,28 +81,8 @@ module.exports = (sequelize) => {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
-    },
-    rol_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'roles',
-        key: 'id',
-      },
-    },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
-    },
+    }
   }, {
-    sequelize,
-    modelName: 'Usuario',
     sequelize,
     modelName: 'Usuario',
     tableName: 'usuarios',

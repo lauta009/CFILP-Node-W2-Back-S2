@@ -30,7 +30,13 @@ const crearLibroValidator = [
     .notEmpty().withMessage('El título es obligatorio')
     .isLength({ max: 150 }).withMessage('El título no puede tener más de 150 caracteres')
     .isString().withMessage('El título debe ser una cadena de texto'),
-
+  
+  body('saga_coleccion')
+    .optional()
+    .isString().withMessage('La saga o colección debe ser una cadena de texto')
+    .trim()
+    .isLength({ max: 100 }).withMessage('La saga o colección no puede tener más de 100 caracteres'),
+  
   body('editorial_id')
     .optional({ checkFalsy: true })
     .custom(async (value) => {
@@ -158,6 +164,24 @@ const idLibroValidator = [
     .isInt({ min: 1 }).withMessage('ID del libro inválido')
 ];
 
+const buscarLibrosValidaciones = [
+  query('titulo')
+    .optional()
+    .isString().withMessage('El título debe ser una cadena de texto')
+    .trim(),
+  query('saga')
+    .optional()
+    .isString().withMessage('La saga debe ser una cadena de texto')
+    .trim(),
+  // Validación personalizada para asegurar que al menos uno de los dos esté presente
+  (req, res, next) => {
+    if (!req.query.titulo && !req.query.saga) {
+      return res.status(400).json({ errors: [{ msg: 'Debe proporcionar al menos un título o una saga para la búsqueda', param: 'query' }] });
+    }
+    next();
+  },
+];
+
 const estadoValidator = [
   param('estado')
     .optional()
@@ -169,6 +193,7 @@ const estadoValidator = [
 module.exports = {
   crearLibroValidator,
   idLibroValidator,
+  buscarLibrosValidaciones,
   listarLibrosValidator,
   estadoValidator,
 };

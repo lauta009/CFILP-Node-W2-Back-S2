@@ -3,7 +3,7 @@ const router = express.Router();
 
 const libroController = require('../Controllers/libro.controller');
 
-const { crearLibroValidator, idLibroValidator, listarLibrosValidator, estadoValidator } = require('../middlewares/validaciones/libro.validaciones');
+const { crearLibroValidator, idLibroValidator, listarLibrosValidator, estadoValidator, buscarLibrosValidaciones } = require('../middlewares/validaciones/libro.validaciones');
 const validarErrores = require('../middlewares/validaciones/validarErrores');
 
 //Rutas basicas del CRUD de libros
@@ -19,6 +19,12 @@ router.get('/obtener-uno/:id',
   validarErrores,
   libroController.obtenerPorId
 );
+
+router.get('/buscar',
+  buscarLibrosValidaciones, 
+  validarErrores, 
+  libroController.buscarLibrosController
+); 
 
 router.post(
   '/',

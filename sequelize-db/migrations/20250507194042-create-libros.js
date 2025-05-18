@@ -6,6 +6,7 @@ module.exports = {
     await queryInterface.createTable('libros', {
       id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
       titulo: { type: Sequelize.STRING(255), allowNull: false },
+      saga_coleccion: Sequelize.STRING(255),
       editorial_id: {
         type: Sequelize.INTEGER,
         references: { model: 'editoriales', key: 'id' },
@@ -28,6 +29,7 @@ module.exports = {
       created_at: Sequelize.DATE,
       updated_at: Sequelize.DATE
     });
+    await queryInterface.addIndex('libros', ['titulo', 'isbn', 'es_premium']);
   },
   down: async (queryInterface) => {
     await queryInterface.dropTable('libros');
