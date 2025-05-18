@@ -1,4 +1,3 @@
-const { raw } = require('mysql2');
 const { Libro, Autor, Categoria, Editorial, Ejemplar, Alquiler } = require('../models');
 const { validarISBNconOpenLibrary } = require('../utils/externalApis');
 const { Op } = require('sequelize');

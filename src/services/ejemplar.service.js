@@ -1,5 +1,4 @@
 const { Ejemplar, Libro } = require('../models');
-const { Op } = require('sequelize');
 
 async function crearEjemplar(datos) {
   try {

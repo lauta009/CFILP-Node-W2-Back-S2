@@ -12,7 +12,6 @@ const {authMiddleware, permisosCheck} = require('./middlewares/auth.middleware')
 const ejemplarRoutes = require('./routes/ejemplar.routes');
 const alquilerRoutes = require('./routes/alquiler.routes');
 const categoriaRoutes = require('./routes/categoria.routes');
-const { sequelize } = require('../sequelize-db/config/database');
 
 dotenv.config(); 
 
@@ -32,13 +31,14 @@ app.use('/api', (req, res, next) => {
   if (req.path.startsWith('/auth')) return next(); // Excluye auth
   return permisosCheck(req, res, next);
 });
+
 app.use('/api/libros', libroRoutes);
+app.use('/api/alquileres', alquilerRoutes);
+app.use('/api/categorias', categoriaRoutes);
+app.use('/api/ejemplares', ejemplarRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/ejemplares', ejemplarRoutes);
 app.use('/api/mi_perfil', mi_perfilRoutes);
-
-
 
 // Manejador de errores
 
@@ -50,7 +50,7 @@ app.use('/api/mi_perfil', mi_perfilRoutes);
 sync()
   .then(() => {
     app.listen(3000, () => {
-      console.log('✅ Servidor corriendo en http://localhost:3000');
+      console.log('✅ Servidor corriendo en http://localhost:3000/api');
     });
   })
   .catch((err) => {

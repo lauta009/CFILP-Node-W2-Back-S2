@@ -8,18 +8,23 @@ async function login(req, res) {
     const { email, password } = req.body;
     const usuario = await authService.buscarPorEmail(email);
     if (!usuario) {
+      console.log('Usuario no encontrado en la bbdd');
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
     const passwordValido = await authService.validarPassword(password, usuario.password);
     if (!passwordValido) {
+      console.log('Contraseña inválida');
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
     if(!usuario.estado){
+      console.log('Usuario inactivo');
       return res.status(401).json({ error: 'Usuario inactivo' });
     }
+    // Generar el token JWT
     const token = jwt.sign({ id: usuario.id, rol_id:usuario.rol_id}, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN, 
     });
+
     usuario.ultimo_login = new Date();
 
     await updateUsuario(usuario.id, {ultimo_login:usuario.ultimo_login});
@@ -56,7 +61,7 @@ const register = async (req, res) => {
     });
     res.status(201).json(nuevoUsuario);
   } catch (error) {
-    
+    console.error('Error al registrar usuario:', error);
     res.status(500).json({ error: 'Error al registrar usuario' });
   }
 };

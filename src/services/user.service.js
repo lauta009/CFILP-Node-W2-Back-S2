@@ -1,4 +1,5 @@
 const { Usuario, Rol } = require('../models');
+
 const getAllUsuarios = async () => {
   return await Usuario.findAll({
     include: [
@@ -31,7 +32,7 @@ const updateUsuario = async (id, data) => {
 const deleteUsuario = async (id) => {
   const usuario = await Usuario.findByPk(id);
   if (!usuario) return null;
-  usuario.estado = false; // Cambia el estado a false en lugar de eliminar
+  usuario.estado = false; // Eliminacin lógica
   await usuario.save();
   return true;
 };

@@ -47,6 +47,8 @@ INSERT INTO alquileres (usuario_id, ejemplar_id, fecha_alquiler, fecha_vencimien
 (3, 1, DATE_SUB(NOW(), INTERVAL 5 DAY), DATE_ADD(NOW(), INTERVAL 2 DAY), NULL, 'atrasado', NOW(), NOW()),
 (2, 3, DATE_SUB(NOW(), INTERVAL 10 DAY), DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_SUB(NOW(), INTERVAL 1 DAY), 'devuelto', NOW(), NOW());
 
+
+
 -- Tabla permisos
 INSERT INTO permisos (nombre, created_at, updated_at) VALUES
 ('listar_libros', NOW(), NOW()),

@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const { Usuario } = require('../models');
-const rol = require('../models/rol');
 
 const authMiddleware = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1]; // Bearer TOKEN
@@ -23,7 +22,7 @@ const authMiddleware = async (req, res, next) => {
 
     const permisos = usuario.rol?.permisos?.map(p => p.nombre) || [];
 
-    // Adjuntá el usuario y permisos a la request
+    // Se incorpora el usuario y los permisos a la request
     req.usuario = {
       id: usuario.id,
       nombre: usuario.nombre,
@@ -32,7 +31,6 @@ const authMiddleware = async (req, res, next) => {
       permisos
     };
 
-
     next();
   } catch (err) {
     console.error('Error al verificar el token:', err);
@@ -40,17 +38,13 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-
+let accion = '';
 
 const permisosCheck = (req, res, next) => {
-  if(req.method === 'POST') { 
-    var accion = 'gestionar';
-  }else if(req.method === 'PUT') {
-    var accion = 'gestionar';
-  }else if(req.method === 'DELETE') {
-    var accion = 'gestionar';
+  if(req.method === 'POST' || req.method === 'PATCH' || req.method === 'PUT' || req.method === 'DELETE') { 
+    accion = 'gestionar';
   }else{
-    var accion = 'consultar';
+    accion = 'consultar';
   }
   const ruta = req.path; // por ejemplo, /libros/123
   const partes = ruta.split('/').filter(Boolean); // ['libros', '123']
