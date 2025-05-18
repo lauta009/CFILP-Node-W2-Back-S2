@@ -1,1 +1,0 @@
-CREATE UNIQUE INDEX idx_ejemplares_codigo_barra ON ejemplares(codigo_barra);

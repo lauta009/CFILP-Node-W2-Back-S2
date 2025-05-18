@@ -92,8 +92,8 @@ JOIN usuarios u ON a.usuario_id = u.id
 WHERE a.estado = 'pendiente'
 ORDER BY a.fecha_alquiler DESC;
 
---Libros con estado "premium" y sus categorías distintas
-SELECT DISTINCT c.nombre AS categoria_premium
+--Categorias con libros premium
+SELECT DISTINCT c.nombre AS categorias_premium
 FROM libros l
 JOIN categorias c ON l.categoria_id = c.id
 WHERE l.es_premium = true;
@@ -132,3 +132,97 @@ SELECT
 FROM libros l
 JOIN ejemplares e ON l.id = e.libro_id
 WHERE e.estado = 'reparacion';
+
+
+-- Obtner todos los alquileres activos 
+SELECT
+    a.id AS alquiler_id,
+    u.id AS usuario_id,
+    u.nombre AS usuario_nombre,
+    u.apellido AS usuario_apellido,
+    e.id AS ejemplar_id,
+    l.titulo AS libro_titulo,
+    a.fecha_alquiler,
+    a.fecha_vencimiento
+FROM alquileres a
+JOIN usuarios u ON a.usuario_id = u.id
+JOIN ejemplares e ON a.ejemplar_id = e.id
+JOIN libros l ON e.libro_id = l.id
+WHERE a.estado = 'pendiente';
+
+-- Obtener todos los alquileres activos, mostrando libro y ejemplar
+SELECT
+    a.id AS alquiler_id,
+    l.titulo AS libro_titulo,
+    e.codigo_barra AS ejemplar_codigo_barra,
+    u.nombre AS usuario_nombre,
+    u.apellido AS usuario_apellido,
+    a.fecha_alquiler,
+    a.fecha_vencimiento
+FROM alquileres a
+JOIN ejemplares e ON a.ejemplar_id = e.id
+JOIN libros l ON e.libro_id = l.id
+JOIN usuarios u ON a.usuario_id = u.id
+WHERE a.estado = 'pendiente';
+
+-- Todos los alquileres vencidos  (con fecha de vencimiento menor a la actual y sin devolver)
+SELECT
+    a.id AS alquiler_id,
+    l.titulo AS libro_titulo,
+    e.codigo_barra AS ejemplar_codigo_barra,
+    u.nombre AS usuario_nombre,
+    u.apellido AS usuario_apellido,
+    a.fecha_alquiler,
+    a.fecha_vencimiento
+FROM alquileres a
+JOIN ejemplares e ON a.ejemplar_id = e.id
+JOIN libros l ON e.libro_id = l.id
+JOIN usuarios u ON a.usuario_id = u.id
+WHERE a.estado = 'pendiente'
+  AND a.fecha_vencimiento < NOW();
+
+--Obetner el historial de alquileres de un usuario especifico:
+SELECT
+    a.id AS alquiler_id,
+    e.id AS ejemplar_id,
+    l.titulo AS libro_titulo,
+    a.fecha_alquiler,
+    a.fecha_vencimiento,
+    a.fecha_devolucion,
+    a.estado
+FROM alquileres a
+JOIN ejemplares e ON a.ejemplar_id = e.id
+JOIN libros l ON e.libro_id = l.id
+WHERE a.usuario_id = 1;
+
+-- Obtener info de un usuario por ID
+SELECT
+    u.id AS usuario_id,
+    r.nombre AS rol_nombre,
+    u.nombre,
+    u.apellido,
+    u.email,
+    u.telefono,
+    u.direccion
+FROM usuarios u
+JOIN roles r ON u.rol_id = r.id
+WHERE u.id = 1;
+
+-- Obtener todos los usuarios PREMIUM
+SELECT
+    u.id AS usuario_id,
+    u.nombre,
+    u.apellido,
+    u.email
+FROM usuarios u
+JOIN roles r ON u.rol_id = r.id
+WHERE r.nombre = 'premium';
+
+-- Obtener todos los permisos para el usuario admin
+SELECT
+    p.id AS permiso_id,
+    p.nombre AS permiso_nombre
+FROM roles_permisos rp
+JOIN permisos p ON rp.permiso_id = p.id
+JOIN roles r ON rp.rol_id = r.id
+WHERE r.nombre = 'admin';
