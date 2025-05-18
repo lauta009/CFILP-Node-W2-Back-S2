@@ -4,12 +4,14 @@ const { sync } = require('../sequelize-db/config/database');
 const setupSwagger = require('../docs/swagger');
 const libroRoutes = require('./routes/libro.routes');
 const userRoutes = require('./routes/user.routes');
+
 const authRoutes = require('./routes/auth.routes');
 const mi_perfilRoutes = require('./routes/mi_perfil.routes');
 
 const {authMiddleware, permisosCheck} = require('./middlewares/auth.middleware');
-
+const ejemplarRoutes = require('./routes/ejemplar.routes');
 const { sequelize } = require('../sequelize-db/config/database');
+
 dotenv.config(); 
 
 const app = express();
@@ -31,6 +33,7 @@ app.use('/api', (req, res, next) => {
 app.use('/api/libros', libroRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/ejemplares', ejemplarRoutes);
 app.use('/api/mi_perfil', mi_perfilRoutes);
 
 
