@@ -12,6 +12,7 @@ module.exports = (sequelize) => {
         foreignKey: 'rol_id',
         as: 'permisos'
       });
+      
     }
   }
 

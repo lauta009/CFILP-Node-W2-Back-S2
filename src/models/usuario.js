@@ -55,6 +55,13 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(20),
       allowNull: true,
     },
+    nro_doc: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },cod_postal: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     direccion: {
       type: DataTypes.STRING(150),
       allowNull: true,

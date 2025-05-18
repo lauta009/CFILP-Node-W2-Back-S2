@@ -1,10 +1,10 @@
-const { Usuario } = require('../models');
+const { Usuario, Rol } = require('../models');
 const getAllUsuarios = async () => {
   return await Usuario.findAll({
     include: [
       {
-        model: require('../models/rol').Rol,
-        through: { attributes: [] }, // Exclude the join table attributes
+        model: Rol,
+        as: 'rol',
       },
     ],
   });
@@ -20,15 +20,19 @@ const createUsuario = async (data) => {
 
 const updateUsuario = async (id, data) => {
   const usuario = await Usuario.findByPk(id);
+
   if (!usuario) return null;
   await usuario.update(data);
+
+  await usuario.save();
   return usuario;
 };
 
 const deleteUsuario = async (id) => {
   const usuario = await Usuario.findByPk(id);
   if (!usuario) return null;
-  await usuario.destroy();
+  usuario.estado = false; // Cambia el estado a false en lugar de eliminar
+  await usuario.save();
   return true;
 };
 

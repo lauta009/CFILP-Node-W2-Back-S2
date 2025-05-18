@@ -11,6 +11,8 @@ module.exports = {
       },
       nombre: Sequelize.STRING(100),
       apellido: Sequelize.STRING(100),
+      nro_doc: Sequelize.INTEGER,
+      cod_postal: Sequelize.INTEGER,
       email: {
         type: Sequelize.STRING(100),
         unique: true,

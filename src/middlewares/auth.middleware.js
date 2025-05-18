@@ -5,11 +5,10 @@ const rol = require('../models/rol');
 const authMiddleware = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1]; // Bearer TOKEN
   if (!token) return res.status(401).json({ error: 'Token no proporcionado' });
-  console.log('token:', token);
-  console.log('secret:', process.env.JWT_SECRET);
+
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('decoded:', decoded);
+
     const usuario = await Usuario.findByPk(decoded.id, {
       include: {
         association: 'rol',
@@ -20,6 +19,7 @@ const authMiddleware = async (req, res, next) => {
     });
     
     if (!usuario) return res.status(401).json({ error: 'Usuario no encontrado' });
+    if (!usuario.estado) return res.status(401).json({ error: 'Usuario inactivo' });
 
     const permisos = usuario.rol?.permisos?.map(p => p.nombre) || [];
 
@@ -48,7 +48,7 @@ const permisosCheck = (req, res, next) => {
   }else if(req.method === 'PUT') {
     var accion = 'gestionar';
   }else if(req.method === 'DELETE') {
-    var accion = 'eliminar';
+    var accion = 'gestionar';
   }else{
     var accion = 'consultar';
   }
@@ -56,8 +56,7 @@ const permisosCheck = (req, res, next) => {
   const partes = ruta.split('/').filter(Boolean); // ['libros', '123']
   const recurso = partes[0]; // 'libros
   const permiso = `${accion}_${recurso}`;
-  console.log('permisoSolicitado', permiso);
-  console.log('req.usuario.permisos', req.usuario.permisos);
+
   const permisosBD = req.usuario.permisos; // ['gestionarLibros', 'consultarLibros', 'eliminarLibros']
   if( permisosBD.includes(permiso)) {
     next();

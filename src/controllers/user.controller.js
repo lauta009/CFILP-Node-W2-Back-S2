@@ -5,6 +5,7 @@ const getAll = async (req, res) => {
     const usuarios = await usuarioService.getAllUsuarios();
     res.json(usuarios);
   } catch (err) {
+    console.log(err);
     res.status(500).json({ error: 'Error al obtener los usuarios' });
   }
 };
@@ -40,9 +41,9 @@ const update = async (req, res) => {
 
 const remove = async (req, res) => {
   try {
-    const eliminado = await usuarioService.deleteUsuario(req.params.id);
+    const eliminado = await usuarioService.updateUsuario(req.params.id, { estado: false });
     if (!eliminado) return res.status(404).json({ error: 'Usuario no encontrado' });
-    res.status(204).send();
+    res.status(200).json({ message: 'Usuario eliminado correctamente' });
   } catch (err) {
     res.status(500).json({ error: 'Error al eliminar el usuario' });
   }
