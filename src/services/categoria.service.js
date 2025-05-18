@@ -1,6 +1,29 @@
 const { Categoria, Libro } = require('../models');
 
 const categoriaService = {
+
+  async _obtenerSubcategoriasConLibros(categoria) {
+    const subcategorias = await Categoria.findAll({
+      where: { categoria_padre_id: categoria.id },
+      attributes: ['id', 'nombre'],
+      include: [
+        {
+          model: Libro,
+          as: 'Libros',
+          attributes: ['id', 'titulo', 'isbn'],
+        },
+      ],
+      order: [['nombre', 'ASC']],
+    });
+
+    return Promise.all(
+      subcategorias.map(async (subcategoria) => ({
+        ...subcategoria.get({ plain: true }),
+        //hijas: await this._obtenerSubcategoriasConLibros(subcategoria), Implementar si se implementa un arbol mas profundo
+      }))
+    );
+  },
+
   async crearCategoria(nombre, categoria_padre_id) {
     const nuevaCategoria = await Categoria.create({ nombre, categoria_padre_id });
     return nuevaCategoria;
@@ -57,62 +80,20 @@ const categoriaService = {
       attributes: ['id', 'nombre'],
       include: [
         {
-          model: Categoria,
-          as: 'hijas',
-          attributes: ['id', 'nombre'],
-          include: [
-            {
-              model: Categoria,
-              as: 'hijas',
-              attributes: ['id', 'nombre'],
-              include: [
-                {
-                  model: Libro,
-                  as: 'libros',
-                  attributes: ['id', 'titulo', 'isbn'],
-                },
-              ],
-            },
-            {
-              model: Libro,
-              as: 'libros',
-              attributes: ['id', 'titulo', 'isbn'],
-            },
-          ],
-        },
-        {
           model: Libro,
-          as: 'libros',
+          as: 'Libros',
           attributes: ['id', 'titulo', 'isbn'],
         },
       ],
       order: [['nombre', 'ASC']],
     });
 
-    const categoriasRaizSinHijas = await Categoria.findAll({
-      where: { categoria_padre_id: null },
-      attributes: ['id', 'nombre'],
-      include: [
-        {
-          model: Libro,
-          as: 'libros',
-          attributes: ['id', 'titulo', 'isbn'],
-        },
-      ],
-      having: Sequelize.literal('COUNT(libros.id) > 0'),
-      group: ['Categoria.id'],
-      order: [['nombre', 'ASC']],
-    });
-
-    const categoriasArbolConLibros = [...categoriasPadre];
-
-    categoriasRaizSinHijas.forEach(catRaiz => {
-      if (!categoriasArbolConLibros.some(cat => cat.id === catRaiz.id)) {
-        categoriasArbolConLibros.push(catRaiz);
-      }
-    });
-
-    return categoriasArbolConLibros;
+    return Promise.all(
+      categoriasPadre.map(async (categoria) => ({
+        ...categoria.get({ plain: true }),
+        hijas: await this._obtenerSubcategoriasConLibros(categoria),
+      }))
+    );
   },
 
   async obtenerTodasLasCategorias() {
