@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken');
 const { Usuario } = require('../models');
 
+
 const authMiddleware = async (req, res, next) => {
+
   const token = req.headers.authorization?.split(' ')[1]; // Bearer TOKEN
   if (!token) return res.status(401).json({ error: 'Token no proporcionado' });
 
@@ -41,6 +43,7 @@ const authMiddleware = async (req, res, next) => {
 let accion = '';
 
 const permisosCheck = (req, res, next) => {
+  
   if(req.method === 'POST' || req.method === 'PATCH' || req.method === 'PUT' || req.method === 'DELETE') { 
     accion = 'gestionar';
   }else{

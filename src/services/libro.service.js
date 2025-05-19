@@ -69,6 +69,13 @@ async function _aplicarFiltroEditorial(include, editorial) {
       where: { nombre: { [Op.like]: `%${editorial}%` } },
       required: true,
     });
+  }else{
+    include.push({
+      model: Editorial,
+      as: 'editorial',
+      attributes: ['nombre'],
+      required: false,
+    }); 
   }
 }
 
@@ -77,25 +84,26 @@ async function _aplicarFiltroAutor(include, autor) {
     include.push({
       model: Autor,
       as: 'autores',
-      attributes: ['nombre'],
+      attributes: ['nombre', 'apeliido'],
       through: { attributes: [] },
-      where: { nombre: { [Op.like]: `%${autor}%` } },
+      where: { [Op.or]: [
+        { nombre: { [Op.iLike]: `%${query.autor}%` } },
+        { apellido: { [Op.iLike]: `%${query.autor}%` } }
+      ] 
+      },
       required: true,
+    });
+  }else{
+    include.push({
+      model: Autor,
+      as: 'autores',
+      attributes: ['nombre', 'apellido'],
+      through: { attributes: [] },
+      required: false,
     });
   }
 }
 
-async function _obtenerLibros(where, include, attributes, offset, limit) {
-  return Libro.findAll({
-    where,
-    include,
-    attributes,
-    offset,
-    limit,
-    order: [['titulo', 'ASC']],
-    distinct: true,
-  });
-}
 
 function _formatearLibroBasico(libro) {
   return {
@@ -117,12 +125,16 @@ function _formatearLibroCompleto(libro) {
     nro_paginas: libro.nro_paginas,
     es_premium: libro.es_premium,
     editorial: libro.editorial ? libro.editorial.nombre : null,
-    autores: libro.autores ? libro.autores.map(a => a.nombre) : [],
+    autores: libro.autores ? libro.autores.map(autor => ({
+      nombre: autor.nombre,
+      apellido: autor.apellido,
+    })) : [],
   };
 }
 
 // Funciones auxiliares generales
-function _construirWhereDeLaBusqueda(queryParam) {
+
+function _construirWhereDeLaBusqueda(queryParam) {//
   const where = {};
   if (queryParam.titulo) {
     where.titulo = { [Op.iLike]: `%${queryParam.titulo}%` };
@@ -135,8 +147,14 @@ function _construirWhereDeLaBusqueda(queryParam) {
 
 
 // Funciones principales
-async function listarLibros({ categoria, editorial, autor, page = 1, limit = 10, detalle = 'completo' }) {
-  const offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+async function listarLibros({ categoria, editorial, autor, page, limit, detalle = 'completo' }) {
+  let offset = 0;
+  let queryLimit = limit ? parseInt(limit, 10) : undefined;
+
+  if (page && limit) {
+    offset = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+  }
+
   const where = {};
   const include = [
     {
@@ -153,8 +171,8 @@ async function listarLibros({ categoria, editorial, autor, page = 1, limit = 10,
       required: false,
     }
   ];
-  const attributesBase = ['id', 'titulo', 'isbn', 'categoria_id'];
-  let attributes = [...attributesBase];
+  const atributosBase = ['id', 'titulo', 'isbn', 'categoria_id']; //Para el detalle básico
+  let attributes = [...atributosBase];
 
   if (detalle === 'completo') {
     attributes.push(
@@ -168,18 +186,27 @@ async function listarLibros({ categoria, editorial, autor, page = 1, limit = 10,
     );
     await _aplicarFiltroEditorial(include, editorial);
     await _aplicarFiltroAutor(include, autor);
-  }
+  } 
 
   try {
-    const libros = await _obtenerLibros(where, include, attributes, offset, parseInt(limit, 10));
-    console.log(libros[0]);
+    const findOptions = {
+      where,
+      include,
+      attributes,
+      offset,
+      limit: queryLimit 
+    };
+
+    const { count, rows: libros } = await Libro.findAndCountAll(findOptions);
     const librosFormateados = libros.map(libro =>
       detalle === 'completo' ? _formatearLibroCompleto(libro) : _formatearLibroBasico(libro)
     );
 
     return {
-      currentPage: parseInt(page, 10),
-      limit: parseInt(limit, 10),
+      paginaActual: page ? parseInt(page, 10) : undefined,
+      limitePorPagina: queryLimit,
+      totalDeLibros: count,
+      totalDePaginas: queryLimit ? Math.ceil(count / queryLimit) : 1,
       libros: librosFormateados
     };
 
@@ -187,7 +214,7 @@ async function listarLibros({ categoria, editorial, autor, page = 1, limit = 10,
     console.error('Error al listar libros:', error);
     throw error;
   }
-}
+};
 
 const obtenerLibroPorId = async (id) => {
   return await Libro.findByPk(id, {

@@ -4,6 +4,7 @@ const {validarMiPerfilUsuario, validarPassword} = require('../middlewares/valida
 const mi_perfilController = require('../Controllers/miPerfil.Controller');
 const validarErrores = require('../middlewares/validaciones/validarErrores');
 
+router.get('/', mi_perfilController.obtenerMiPerfil);
 router.put('/actualizarMiPerfil',validarMiPerfilUsuario, validarErrores, mi_perfilController.actualizarMiPerfil);
 router.put('/actualizarPassword',validarPassword, validarErrores, mi_perfilController.actualizarPassword);
 

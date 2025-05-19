@@ -65,7 +65,7 @@ async function obtenerTodosLosEjemplares(query) {
       include: [{
         model: Libro,
         as: 'libro',
-        attributes: ['id', 'titulo']
+        attributes: ['id', 'titulo', 'es_premium']
       }]
     });
 

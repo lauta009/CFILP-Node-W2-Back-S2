@@ -1,5 +1,24 @@
 const usuarioService = require('../services/user.service');
 const authService = require('../services/auth.service');
+
+const obtenerMiPerfil = async (req, res) => {
+  try {
+    const usuario = req.usuario;
+    
+    const usuarioEncontrado = await usuarioService.getUsuarioById(usuario.id);
+    if (!usuarioEncontrado) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    // Devolver el usuario sin la contraseña
+    const { password, ...usuarioSinPassword } = usuarioEncontrado.dataValues;
+    res.status(200).json(usuarioSinPassword);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: 'Error al obtener el perfil del usuario', err: error.message });
+  }
+};
+
 const actualizarMiPerfil = async (req, res) => {
   try {
     const usuario = req.usuario;
@@ -62,5 +81,6 @@ const actualizarPassword = async (req, res) => {
 
 module.exports = {
   actualizarMiPerfil,
-  actualizarPassword
+  actualizarPassword,
+  obtenerMiPerfil
 };

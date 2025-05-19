@@ -13,7 +13,11 @@ module.exports = {
         created_at: new Date(),
         updated_at: new Date()
       },
-
+      {
+        nombre: 'usuario_premium',
+        created_at: new Date(),
+        updated_at: new Date()
+      }
     ]);
   },
 

@@ -25,8 +25,7 @@ module.exports = {
       { id:13, nombre: 'consultar_roles', created_at: new Date(), updated_at: new Date() },          // admin 13
 
       { id:14, nombre: 'gestionar_users', created_at: new Date(), updated_at: new Date() },          // admin 14
-      { id:15, nombre: 'eliminar_users', created_at: new Date(), updated_at: new Date() },  // usuario/premium 15
-      { id:16, nombre: 'consultar_users', created_at: new Date(), updated_at: new Date() },
+      { id:15, nombre: 'consultar_users', created_at: new Date(), updated_at: new Date() },  // usuario/premium 15
       
     ]);
   },

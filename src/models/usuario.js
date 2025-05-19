@@ -57,9 +57,6 @@ module.exports = (sequelize) => {
     nro_doc: {
       type: DataTypes.INTEGER,
       allowNull: false,
-    },cod_postal: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
     },
     direccion: {
       type: DataTypes.STRING(150),
@@ -69,7 +66,7 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(100),
       allowNull: true,
     },
-    codigo_postal: {
+    cod_postal: {
       type: DataTypes.STRING(10),
       allowNull: true,
     },	
