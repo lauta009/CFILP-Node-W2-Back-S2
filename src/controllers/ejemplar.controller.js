@@ -1,4 +1,5 @@
 const ejemplaresService = require('../services/ejemplar.service');
+const { NotFoundError } = require('../utils/appErrors');
 
 const ejemplaresController = {
   async crear(req, res) {
@@ -6,20 +7,20 @@ const ejemplaresController = {
       const nuevoEjemplar = await ejemplaresService.crearEjemplar(req.body);
       res.status(201).json(nuevoEjemplar);
     } catch (error) {
-      res.status(400).json({ error: 'Error al crear ejemplar', detalles: error.message });
+      next(error);
     }
   },
 
   async obtenerUno(req, res) {
     try {
       const ejemplar = await ejemplaresService.obtenerEjemplarPorId(req.params.id);
-      if (ejemplar) {
-        res.status(200).json(ejemplar);
+      if (!ejemplar) {
+         return next(new NotFoundError('Ejemplar no encontrado.'));
       } else {
-        res.status(404).json({ mensaje: 'Ejemplar no encontrado' });
+        res.status(200).json(ejemplar);
       }
     } catch (error) {
-      res.status(500).json({ error: 'Error al obtener ejemplar', detalles: error.message });
+      next(error);
     }
   },
 
@@ -30,10 +31,10 @@ const ejemplaresController = {
       if (ejemplar) {
         res.status(200).json(ejemplar);
       } else {
-        res.status(404).json({ mensaje: `Ejemplar con código de barra ${codigoBarra} no encontrado` });
+        return next(new NotFoundError('`Ejemplar con código de barra ${codigoBarra} no encontrado` .'));
       }
     } catch (error) {
-      res.status(500).json({ error: 'Error al obtener ejemplar por código de barra', detalles: error.message });
+      next(error);
     }
   },
 
@@ -42,7 +43,7 @@ const ejemplaresController = {
       const ejemplares = await ejemplaresService.obtenerTodosLosEjemplares(req.query);
       res.status(200).json(ejemplares);
     } catch (error) {
-      res.status(500).json({ error: 'Error al obtener ejemplares', detalles: error.message });
+      next(error);
     }
   },
 
@@ -52,10 +53,10 @@ const ejemplaresController = {
       if (ejemplarActualizado) {
         res.status(200).json(ejemplarActualizado);
       } else {
-        res.status(404).json({ mensaje: 'Ejemplar no encontrado para actualizar' });
+        return next(new NotFoundError({ mensaje: 'Ejemplar no encontrado para actualizar' }));
       }
     } catch (error) {
-      res.status(400).json({ error: 'Error al actualizar ejemplar', detalles: error.message });
+      next(error);
     }
   },
 
@@ -65,10 +66,10 @@ const ejemplaresController = {
       if (resultado) {
         res.status(204).send();
       } else {
-        res.status(404).json({ mensaje: 'Ejemplar no encontrado para eliminar' });
+        return next(new NotFoundError({ mensaje: 'Ejemplar no encontrado para eliminar' }));
       }
     } catch (error) {
-      res.status(500).json({ error: 'Error al eliminar ejemplar', detalles: error.message });
+      next(error);
     }
   }
 };

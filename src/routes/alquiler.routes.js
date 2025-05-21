@@ -9,7 +9,6 @@ const validarErrores = require('../middlewares/validaciones/validarErrores');
 
 const router = express.Router();
 
-
 router.get('/', alquilerController.obtenerTodosLosAlquileres);
 
 router.get('/obtener-uno/:id', obtenerAlquilerPorIdValidator, validarErrores, alquilerController.obtenerAlquilerPorId);

@@ -1,4 +1,5 @@
 const { Categoria, Libro } = require('../models');
+const { NotFoundError, BadRequestError} = require('../utils/appErrors');
 
 const categoriaService = {
 
@@ -16,23 +17,31 @@ const categoriaService = {
       order: [['nombre', 'ASC']],
     });
 
+    if (subcategorias.length === 0) {
+      return []; 
+    }
+
+
     return Promise.all(
       subcategorias.map(async (subcategoria) => ({
         ...subcategoria.get({ plain: true }),
-        //hijas: await this._obtenerSubcategoriasConLibros(subcategoria), Implementar si se implementa un arbol mas profundo
+        //hijas: await this._obtenerSubcategoriasConLibros(subcategoria), Implementar si se utilizan mas categorias subordinadas, es decir un arbol mas profundo
       }))
     );
   },
 
   async crearCategoria(nombre, categoria_padre_id) {
     const nuevaCategoria = await Categoria.create({ nombre, categoria_padre_id });
+    if (!nuevaCategoria) {
+      return next(new BadRequestError('Error al crear la categoría.'));
+    }
     return nuevaCategoria;
   },
 
   async obtenerCategoriaPorId(id) {
     const categoria = await Categoria.findByPk(id);
     if (!categoria) {
-      throw new Error('Categoría no encontrada');
+      return next(new NotFoundError(`Categoría con ID ${id} no encontrada.`));
     }
     return categoria;
   },
@@ -40,7 +49,7 @@ const categoriaService = {
   async actualizarCategoria(id, nombre, categoria_padre_id) {
     const [filasActualizadas] = await Categoria.update({ nombre, categoria_padre_id }, { where: { id } });
     if (filasActualizadas === 0) {
-      throw new Error('Categoría no encontrada');
+      return next(new NotFoundError(`Categoría con ID ${id} no encontrada.`));
     }
     const categoriaActualizada = await Categoria.findByPk(id);
     return categoriaActualizada;
@@ -49,7 +58,7 @@ const categoriaService = {
   async eliminarCategoria(id) {
     const filasEliminadas = await Categoria.destroy({ where: { id } });
     if (filasEliminadas === 0) {
-      throw new Error('Categoría no encontrada');
+      return next(new NotFoundError(`Categoría con ID ${id} no encontrada.`));
     }
     return { message: `Categoría con ID ${id} eliminada correctamente` };
   },
@@ -71,6 +80,9 @@ const categoriaService = {
       ],
       order: [['nombre', 'ASC']],
     });
+    if (!categoriasPadre) {
+      return next(new NotFoundError('No se encontraron categorías.'));
+    }
     return categoriasPadre;
   },
 
@@ -88,6 +100,10 @@ const categoriaService = {
       order: [['nombre', 'ASC']],
     });
 
+    if (!categoriasPadre) {
+      return next(new NotFoundError('No se encontraron categorías.'));
+    }
+
     return Promise.all(
       categoriasPadre.map(async (categoria) => ({
         ...categoria.get({ plain: true }),
@@ -98,6 +114,9 @@ const categoriaService = {
 
   async obtenerTodasLasCategorias() {
     const categorias = await Categoria.findAll({ order: [['nombre', 'ASC']] });
+    if (!categorias) {
+      return next(new NotFoundError('No se encontraron categorías.'));
+    }
     return categorias;
   },
 };

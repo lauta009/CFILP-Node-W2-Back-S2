@@ -1,7 +1,9 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const { sync } = require('../sequelize-db/config/database');
-//const setupSwagger = require('../docs/swagger');
+const globalErrorHandler = require('./middlewares/errorHandler.middleware');
+const { NotFoundError } = require('./utils/appErrors');
+const setupSwagger = require('../docs/swagger');
 
 // Importación de las rutas
 const libroRoutes = require('./routes/libro.routes');
@@ -54,11 +56,17 @@ app.use('/api/ejemplares', ejemplarRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/mi-perfil', mi_perfilRoutes);
 
-// Manejador de errores
 
+// Si una ruta no coincide con ninguna de las definidas arriba, llegará aquí.
+app.use((req, res, next) => {
+  next(new NotFoundError(`No se puede encontrar ${req.originalUrl} en este servidor!`));
+});
+
+// Manejador de errores
+app.use(globalErrorHandler);
 
 // Documentación con swagger
-//setupSwagger(app);
+setupSwagger(app);
 
 // Sincronización con la bbdd y arranque del servidor
 sync()

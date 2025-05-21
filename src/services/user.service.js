@@ -1,4 +1,5 @@
 const { Usuario, Rol } = require('../models');
+const { NotFoundError } = require('../utils/appErrors');
 
 const getAllUsuarios = async () => {
   return await Usuario.findAll({
@@ -12,7 +13,18 @@ const getAllUsuarios = async () => {
 };
 
 const getUsuarioById = async (id) => {
-  return await Usuario.findByPk(id);
+  const resultado = await Usuario.findByPk(id, {
+    include: [
+      {
+        model: Rol,
+        as: 'rol',
+      },
+    ],
+  });
+  if (!resultado) {
+    throw new NotFoundError('Usuario no encontrado');
+  }
+  return resultado;
 };
 
 const createUsuario = async (data) => {
@@ -22,7 +34,7 @@ const createUsuario = async (data) => {
 const updateUsuario = async (id, data) => {
   const usuario = await Usuario.findByPk(id);
 
-  if (!usuario) return null;
+  if (!usuario) return  next(new NotFoundError('Usuario no encontrado'));
   await usuario.update(data);
 
   await usuario.save();
@@ -31,7 +43,7 @@ const updateUsuario = async (id, data) => {
 
 const deleteUsuario = async (id) => {
   const usuario = await Usuario.findByPk(id);
-  if (!usuario) return null;
+  if (!usuario) return next(new NotFoundError('Usuario no encontrado'));
   usuario.estado = false; // Eliminacin lógica
   await usuario.save();
   return true;
