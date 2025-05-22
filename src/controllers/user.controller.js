@@ -1,7 +1,7 @@
 const usuarioService = require('../services/user.service');
 const { NotFoundError, BadRequestError } = require('../utils/appErrors');
 
-const getAll = async (req, res) => {
+const getAll = async (req, res, next) => {
   try {
     const usuarios = await usuarioService.getAllUsuarios();
     res.json(usuarios);
@@ -10,7 +10,7 @@ const getAll = async (req, res) => {
   }
 };
 
-const getById = async (req, res) => {
+const getById = async (req, res, next) => {
   try {
     const usuario = await usuarioService.getUsuarioById(req.params.id);
     if (!usuario) return next(new NotFoundError('Usuario no encontrado'));
@@ -20,7 +20,7 @@ const getById = async (req, res) => {
   }
 };
 
-const create = async (req, res) => {
+const create = async (req, res, next) => {
   try {
     const nuevoUsuario = await usuarioService.createUsuario(req.body);
     res.status(201).json('Usuario creado correctamente: ' + nuevoUsuario);
@@ -29,8 +29,9 @@ const create = async (req, res) => {
   }
 };
 
-const update = async (req, res) => {
+const update = async (req, res, next) => {
   try {
+    console.log((req.body));
     const usuario = await usuarioService.updateUsuario(req.params.id, req.body);
     if (!usuario) return next(new NotFoundError('Usuario no encontrado'));
     res.json(usuario);
@@ -39,7 +40,7 @@ const update = async (req, res) => {
   }
 };
 
-const remove = async (req, res) => {
+const remove = async (req, res, next) => {
   try {
     const eliminado = await usuarioService.updateUsuario(req.params.id, { estado: false });
 

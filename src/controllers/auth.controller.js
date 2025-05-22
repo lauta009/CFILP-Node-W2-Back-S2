@@ -2,10 +2,10 @@ const jwt = require('jsonwebtoken');
 const {createUsuario, updateUsuario} = require('../services/user.service');
 const authService = require('../services/auth.service');
 const { NotFoundError, BadRequestError, UnauthorizedError, ForbiddenError, ConflictError} = require('../utils/appErrors');
-const { nextDay } = require('date-fns');
 
 
-async function login(req, res) {
+
+async function login(req, res, next) {
   try {
     const { email, password } = req.body;
     const usuario = await authService.buscarPorEmail(email);
@@ -41,7 +41,7 @@ async function login(req, res) {
   }
 }
 
-const register = async (req, res) => {
+const register = async (req, res, next) => {
   try {
     const { nombre, apellido, email, password, telefono, direccion, localidad, nro_doc, cod_postal  } = req.body;
     // Validar que el email no esté ya registrado

@@ -2,7 +2,7 @@ const categoriaService = require('../services/categoria.service');
 const { NotFoundError, BadRequestError } = require('../utils/appErrors');
 
 const categoriaController = {
-  async crearCategoriaController(req, res) {
+  async crearCategoriaController(req, res, next) {
 
     const { nombre, categoria_padre_id } = req.body;
     try {
@@ -13,7 +13,7 @@ const categoriaController = {
     }
   },
 
-  async obtenerCategoriaPorIdController(req, res) {
+  async obtenerCategoriaPorIdController(req, res, next) {
 
     const { id } = req.params;
     try {
@@ -27,7 +27,7 @@ const categoriaController = {
     }
   },
 
-  async actualizarCategoriaController(req, res) {
+  async actualizarCategoriaController(req, res, next) {
 
     const { id } = req.params;
     const { nombre, categoria_padre_id } = req.body;
@@ -39,7 +39,7 @@ const categoriaController = {
     }
   },
 
-  async eliminarCategoriaController(req, res) {
+  async eliminarCategoriaController(req, res, next) {
 
     const { id } = req.params;
     try {
@@ -50,7 +50,7 @@ const categoriaController = {
     }
   },
 
-  async obtenerCategoriasArbolController(req, res) {
+  async obtenerCategoriasArbolController(req, res, next) {
     try {
       const categoriasArbol = await categoriaService.obtenerCategoriasArbol();
       res.status(200).json(categoriasArbol);
@@ -59,7 +59,7 @@ const categoriaController = {
     }
   },
 
-  async obtenerCategoriasArbolConLibrosController(req, res) {
+  async obtenerCategoriasArbolConLibrosController(req, res, next) {
     try {
       const categoriasArbolConLibros = await categoriaService.obtenerCategoriasArbolConLibros();
       res.status(200).json(categoriasArbolConLibros);
@@ -68,7 +68,7 @@ const categoriaController = {
     }
   },
 
-  async obtenerTodasLasCategoriasController(req, res) {
+  async obtenerTodasLasCategoriasController(req, res, next) {
     try {
       const todasLasCategorias = await categoriaService.obtenerTodasLasCategorias();
       res.status(200).json(todasLasCategorias);

@@ -13,9 +13,6 @@ const validarPassword = async (passwordPlano, passwordHasheado) => {
 
 const buscarPorEmail = async (email) => {
   const resultado = await Usuario.findOne({ where: { email } });
-  if (!resultado) {
-    throw new NotFoundError('Usuario no encontrado.');
-  }
   return resultado;
 };
 

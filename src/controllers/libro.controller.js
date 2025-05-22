@@ -11,6 +11,7 @@ const libroController = {
       next(error);
     }
   },
+  
   // Método para listar libros con filtros y paginación
   // Se pueden filtrar por categoría, editorial y autor
   async listar(req, res, next) {
@@ -21,7 +22,7 @@ const libroController = {
         editorial: editorial ?? null,
         autor: autor ?? null,
         page: page ?? 1,
-        limit: limit ?? 10,
+        limit: limit ?? 100000,
         detalle: detalle ?? 'completo', 
       };
       const resultado = await libroService.listarLibros(params);
@@ -35,11 +36,11 @@ const libroController = {
     try {
       const libro = await libroService.obtenerLibroPorId(req.params.id);
       if (!libro) {
-         return next(new NotFoundError('Libro no encontrado.'));
+        return next(new NotFoundError('Libro no encontrado.'));
       }
       res.status(200).json(libro);
     } catch (error) {
-       next(error);
+      next(error);
     }
   },
   	
@@ -66,7 +67,7 @@ const libroController = {
         return next(new NotFoundError('Libro no encontrado para actualizar.'));
       }
     } catch (error) {
-       next(error);
+      next(error);
     }
   },
 

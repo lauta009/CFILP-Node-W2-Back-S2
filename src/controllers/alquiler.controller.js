@@ -2,7 +2,7 @@ const alquilerService = require('../services/alquiler.service');
 const { NotFoundError } = require('../utils/appErrors');
 
 const alquilerController = {
-  async crearAlquilerRegular(req, res) {
+  async crearAlquilerRegular(req, res, next) {
     const { ejemplar_id } = req.body;
     const usuarioId = req.usuario.id; // Obtiene el ID del usuario del token
     if (!usuarioId) {
@@ -17,7 +17,7 @@ const alquilerController = {
     }
   },
 
-  async crearAlquilerPremium(req, res) {
+  async crearAlquilerPremium(req, res, next) {
     const { ejemplar_id } = req.body;
     const usuarioId = req.usuario.id; // Obtiene el ID del usuario del token
     if (!usuarioId) {
@@ -32,9 +32,9 @@ const alquilerController = {
     }
   },
 
-  async devolverEjemplar(req, res) {
+  async devolverEjemplar(req, res, next) {
     const { ejemplar_id } = req.body;
-     const usuarioId = req.usuario.id; // Obtiene el ID del usuario del token
+    const usuarioId = req.usuario.id; // Obtiene el ID del usuario del token
     if (!usuarioId) {
       console.log('No se encontró el ID del usuario en el token');
       return next(new NotFoundError('Usuario  con no encontrado'));
@@ -47,7 +47,7 @@ const alquilerController = {
     }
   },
 
-  async obtenerTodosLosAlquileres(req, res) {
+  async obtenerTodosLosAlquileres(req, res, next) {
     try {
       const alquileres = await alquilerService.obtenerTodosLosAlquileres();
       res.status(200).json(alquileres);
@@ -56,7 +56,7 @@ const alquilerController = {
     }
   },
 
-  async obtenerAlquilerPorId(req, res) {
+  async obtenerAlquilerPorId(req, res, next) {
     const id = parseInt(req.params.id);
     try {
       const alquiler = await alquilerService.obtenerAlquilerPorId(id);
@@ -70,7 +70,7 @@ const alquilerController = {
     }
   },
 
-  async obtenerAlquileresActivos(req, res) {
+  async obtenerAlquileresActivos(req, res, next) {
     try {
       const alquileresActivos = await alquilerService.obtenerAlquileresActivos();
       res.status(200).json(alquileresActivos);
@@ -79,7 +79,7 @@ const alquilerController = {
     }
   },
 
-  async obtenerAlquileresActivosVencidos(req, res) {
+  async obtenerAlquileresActivosVencidos(req, res, next) {
     try {
       const alquileresVencidos = await alquilerService.obtenerAlquileresActivosVencidos();
       res.status(200).json(alquileresVencidos);

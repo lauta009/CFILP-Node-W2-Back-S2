@@ -1,7 +1,11 @@
 const axios = require('axios');
-const jwt_decode = require('jwt-decode');
 
 const API_BASE_URL = 'http://localhost:3000/api';
+
+// Función auxiliar para introducir una pausa
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 async function registrarUsuario(userData) {
   try {
@@ -27,8 +31,8 @@ async function iniciarSesion(credentials) {
 
 async function listarLibros() {
   try {
-    const response = await axios.get(`${API_BASE_URL}/libros`);
-    console.log('Lista de libros:', response.data);
+    const response = await axios.get(`${API_BASE_URL}/libros/?limit=5`); // Limitar a 5 libros
+    console.log('Lista de los primeros 5 libros ordenados alfabeticamente:', response.data);
   } catch (error) {
     console.error('Error al listar libros:', error.response ? error.response.data : error.message);
   }
@@ -46,6 +50,7 @@ async function solicitarAlquilerRegular(token, ejemplarId) {
     return response.data; // Retorna los datos del alquiler
   } catch (error) {
     console.error('Error al solicitar alquiler regular:', error.response ? error.response.data : error.message);
+    throw error; 
   }
 }
 
@@ -61,6 +66,7 @@ async function devolverLibro(token, ejemplarId) {
     return response.data; 
   } catch (error) {
     console.error('Error al devolver libro:', error.response ? error.response.data : error.message);
+    throw error;
   }
 }
 
@@ -70,8 +76,10 @@ async function consultarPerfil(token) {
       headers: { Authorization: `Bearer ${token}` }
     });
     console.log('Información del perfil:', response.data);
+    return response.data;
   } catch (error) {
     console.error('Error al consultar el perfil:', error.response ? error.response.data : error.message);
+    throw error;
   }
 }
 
@@ -85,22 +93,88 @@ async function main() {
   };
 
   let tokenRegular;
+  let ejemplarParaAqluilarId = 4; // ID de un ejemplar no premium
+  let PAUSE_DURATION = 10000; 
+
+  console.log('--- Iniciando simulación de cliente regular ---');
+  await delay(PAUSE_DURATION / 3); // Pausa inicial
 
   try {
-    await registrarUsuario(registroData);
+    console.log('\n--- Paso 1: Registrar usuario (si no existe) ---');
+    // Intentar registrar. Si ya existe, capturamos el error pero continuamos con el login.
+    await delay(PAUSE_DURATION / 4); // Pausa 
+    try {
+      await registrarUsuario(registroData);
+      console.log('Usuario registrado exitosamente.');
+    } catch (error) {
+      if (error.response && error.response.status === 409) {// 409 Conflict 
+        console.warn('Usuario ya registrado, continuando con el inicio de sesión.');
+      } else {
+        console.error('Error inesperado durante el registro. Deteniendo.', error);
+        return;
+      }
+    }
+
+    await delay(PAUSE_DURATION); // Pausa de 10 segundos
+
+    console.log('\n--- Paso 2: Iniciar sesión ---');
     tokenRegular = await iniciarSesion({ email: registroData.email, password: registroData.password });
-  } catch (registrationError) {
-    console.error('Error en el registro/inicio de sesión:', registrationError);
-    return;
+
+    await delay(PAUSE_DURATION); // Pausa de 10 segundos
+
+  } catch (authError) {
+    console.error('\n🚫 Simulación fallida en registro/inicio de sesión:', authError.message);
+    return; // Detener la ejecución si el auth falla
   }
 
   if (tokenRegular) {
-    console.log('Usuario regular autenticado con token:', tokenRegular);
-    await listarLibros();
-    await consultarPerfil(tokenRegular);
-    await solicitarAlquilerRegular(tokenRegular, 4); // Alquilar el ejemplar con ID 4 (de un libro no premium)
-    await devolverLibro(tokenRegular, 4); 
+    console.log('\n✅ Usuario regular autenticado. Token obtenido.');
+
+    try {
+      console.log('\n--- Paso 3: Listar libros ---');
+      await listarLibros();
+
+      await delay(PAUSE_DURATION); // Pausa
+
+      console.log('\n--- Paso 4: Consultar perfil ---');
+      const perfil = await consultarPerfil(tokenRegular);
+      if (perfil) {
+        console.log('Perfil consultado exitosamente:', perfil);
+      } else {
+        console.warn('No se pudo consultar el perfil.');
+      }
+      await delay(PAUSE_DURATION); // Pausa
+
+      console.log('\n--- Paso 5: Solicitar alquiler ---');
+      const alquiler = await solicitarAlquilerRegular(tokenRegular, ejemplarParaAqluilarId);
+      if (alquiler) {
+        console.log('Alquiler exitoso:', alquiler);
+      } else {
+        console.warn('El alquiler no fue exitoso.');
+      }
+
+      await delay(PAUSE_DURATION); // Pausa
+
+      // Solo intentar devolver si el alquiler fue exitoso
+      if (alquiler) {
+        console.log('\n--- Paso 6: Devolver libro ---');
+        await devolverLibro(tokenRegular, ejemplarParaAqluilarId);
+        console.log('Devolución exitosa.');
+
+        await delay(PAUSE_DURATION); // Pausa
+        
+      } else {
+        console.warn('\nAdvertencia: El alquiler no fue exitoso, no se intentará la devolución.');
+      }
+
+    } catch (operationError) {
+      console.error('\n🚫 Simulación fallida durante las operaciones de la biblioteca:', operationError.message);
+    }
+  } else {
+    console.error('\n🚫 No se pudo obtener el token, las operaciones no se realizarán.');
   }
+
+  console.log('\n--- Simulación de cliente regular finalizada ---');
 }
 
 main();

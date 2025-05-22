@@ -1,9 +1,8 @@
 const usuarioService = require('../services/user.service');
 const authService = require('../services/auth.service');
 const { NotFoundError, BadRequestError, ConflictError} = require('../utils/appErrors');
-const { nextDay } = require('date-fns');
 
-const obtenerMiPerfil = async (req, res) => {
+const obtenerMiPerfil = async (req, res, next) => {
   try {
     const usuario = req.usuario;
     
@@ -19,7 +18,7 @@ const obtenerMiPerfil = async (req, res) => {
   }
 };
 
-const actualizarMiPerfil = async (req, res) => {
+const actualizarMiPerfil = async (req, res, next) => {
   try {
     const usuario = req.usuario;
     const { nombre,apellido, email, telefono, direccion, localidad } = req.body;
@@ -55,7 +54,7 @@ const actualizarMiPerfil = async (req, res) => {
   }
 };
 
-const actualizarPassword = async (req, res) => {
+const actualizarPassword = async (req, res, next) => {
   try {
     
     const { password, password_actual } = req.body;

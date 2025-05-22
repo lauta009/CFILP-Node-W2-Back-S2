@@ -1,5 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const path = require('path');
 const { sync } = require('../sequelize-db/config/database');
 const globalErrorHandler = require('./middlewares/errorHandler.middleware');
 const { NotFoundError } = require('./utils/appErrors');
@@ -14,10 +15,10 @@ const ejemplarRoutes = require('./routes/ejemplar.routes');
 const alquilerRoutes = require('./routes/alquiler.routes');
 const categoriaRoutes = require('./routes/categoria.routes');
 
-const {authMiddleware, permisosCheck} = require('./middlewares/auth.middleware');
+const {authMiddleware, } = require('./middlewares/auth.middleware');
 const esRutaPublica = require('./middlewares/rutasPublicas.middleware');
 
-dotenv.config(); 
+dotenv.config({ path: path.resolve(__dirname, '../.env') }); 
 
 const app = express();
 
@@ -39,13 +40,6 @@ app.use('/api', (req, res, next) => {
     return next(); // Saltar el middleware de autenticación
   }
   authMiddleware(req, res, next);
-});
-
-app.use('/api', (req, res, next) => {
-  if (esRutaPublica(req)) {
-    return next(); // Saltar el middleware de permisos
-  }
-  permisosCheck(req, res, next);
 });
 
 // Rutas protegidas

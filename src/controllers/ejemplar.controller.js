@@ -2,7 +2,7 @@ const ejemplaresService = require('../services/ejemplar.service');
 const { NotFoundError } = require('../utils/appErrors');
 
 const ejemplaresController = {
-  async crear(req, res) {
+  async crear(req, res, next) {
     try {
       const nuevoEjemplar = await ejemplaresService.crearEjemplar(req.body);
       res.status(201).json(nuevoEjemplar);
@@ -11,11 +11,11 @@ const ejemplaresController = {
     }
   },
 
-  async obtenerUno(req, res) {
+  async obtenerUno(req, res, next) {
     try {
       const ejemplar = await ejemplaresService.obtenerEjemplarPorId(req.params.id);
       if (!ejemplar) {
-         return next(new NotFoundError('Ejemplar no encontrado.'));
+        return next(new NotFoundError('Ejemplar no encontrado.'));
       } else {
         res.status(200).json(ejemplar);
       }
@@ -24,7 +24,7 @@ const ejemplaresController = {
     }
   },
 
-  async obtenerPorCodigoBarra(req, res) {
+  async obtenerPorCodigoBarra(req, res, next) {
     try {
       const codigoBarra = req.params.codigo_barra;
       const ejemplar = await ejemplaresService.obtenerEjemplarPorCodigoBarra(codigoBarra);
@@ -38,7 +38,7 @@ const ejemplaresController = {
     }
   },
 
-  async obtenerTodos(req, res) {
+  async obtenerTodos(req, res, next) {
     try {
       const ejemplares = await ejemplaresService.obtenerTodosLosEjemplares(req.query);
       res.status(200).json(ejemplares);
@@ -47,7 +47,7 @@ const ejemplaresController = {
     }
   },
 
-  async actualizar(req, res) {
+  async actualizar(req, res, next) {
     try {
       const ejemplarActualizado = await ejemplaresService.actualizarEjemplar(req.params.id, req.body);
       if (ejemplarActualizado) {
@@ -60,7 +60,7 @@ const ejemplaresController = {
     }
   },
 
-  async eliminar(req, res) {
+  async eliminar(req, res, next) {
     try {
       const resultado = await ejemplaresService.eliminarEjemplar(req.params.id);
       if (resultado) {
