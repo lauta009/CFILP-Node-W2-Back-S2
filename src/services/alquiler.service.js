@@ -42,15 +42,15 @@ async function _verificarLimiteAlquileres(usuarioId, limite) {
 async function _crearNuevoAlquiler(usuarioId, ejemplarId, fechaVencimiento) {
   // Verificar si ya existe un alquiler activo para este usuario y ejemplar
   const alquilerActivo = await Alquiler.findOne({
-          where: {
-              usuario_id: usuarioId,
-              ejemplar_id: ejemplarId,
-              fecha_devolucion_real: { [Op.eq]: null } // Que no se haya devuelto aún
-          }
-      });
+    where: {
+      usuario_id: usuarioId,
+      ejemplar_id: ejemplarId,
+      fecha_devolucion: { [Op.eq]: null } // Que no se haya devuelto aún
+    }
+  });
 
   if (alquilerActivo) {
-      throw next(new ConflictError('Este usuario ya tiene un alquiler activo para este ejemplar.'));
+    throw next(new ConflictError('Este usuario ya tiene un alquiler activo para este ejemplar.'));
   }
 
   const now = new Date();
@@ -188,29 +188,29 @@ async function obtenerTodosLosAlquileres() {
 }
 
 async function obtenerAlquilerPorId(id) {
-    const alquiler = await Alquiler.findByPk(id, { 
-      include: [
-        {
-          model: Ejemplar,
-          as: 'ejemplar',
-          attributes: ['id', 'codigo_barra'],
-          include: [{
-            model: Libro,
-            as: 'libro',
-            attributes: ['titulo']
-          }]
-        },
-        {
-          model: Usuario,
-          as: 'usuario',
-          attributes: ['id', 'nombre', 'email']
-        }
-      ]
-    });
-    if (!alquiler) {
-      return next(new NotFoundError(`Alquiler con ID ${id} no encontrado.`));
-    }
-    return alquiler;
+  const alquiler = await Alquiler.findByPk(id, { 
+    include: [
+      {
+        model: Ejemplar,
+        as: 'ejemplar',
+        attributes: ['id', 'codigo_barra'],
+        include: [{
+          model: Libro,
+          as: 'libro',
+          attributes: ['titulo']
+        }]
+      },
+      {
+        model: Usuario,
+        as: 'usuario',
+        attributes: ['id', 'nombre', 'email']
+      }
+    ]
+  });
+  if (!alquiler) {
+    return next(new NotFoundError(`Alquiler con ID ${id} no encontrado.`));
+  }
+  return alquiler;
 }
 
 async function obtenerAlquileresActivos() {
