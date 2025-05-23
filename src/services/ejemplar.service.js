@@ -68,6 +68,49 @@ async function obtenerTodosLosEjemplares(query) {
   };
 }
 
+//Recibe un Id de libro o el titulo
+async function obtenerEjemplaresDisponiblesDeUnLibro(identificadorLibro) {
+  let libro;
+
+  // Determinar si el identificador es un ID (número) o un título (cadena)
+  if (typeof identificadorLibro === 'number') {
+    libro = await Libro.findByPk(identificadorLibro);
+  } else if (typeof identificadorLibro === 'string' && identificadorLibro.trim() !== '') {
+    libro = await Libro.findOne({ where: { titulo: identificadorLibro } });
+  } else {
+    throw new BadRequestError('Identificador de libro inválido. Debe ser un ID o un título.');
+  }
+
+  if (!libro) {
+    throw new NotFoundError(`Libro no encontrado con el identificador: ${identificadorLibro}`);
+  }
+
+  // Buscar los ejemplares de este libro que estén 'disponible'
+  const ejemplaresDisponibles = await Ejemplar.findAll({
+    where: {
+      libro_id: libro.id,
+      estado: 'disponible' 
+    },
+    include: [{
+      model: Libro,
+      as: 'libro',
+      attributes: ['id', 'titulo', 'isbn', 'es_premium'] 
+    }]
+  });
+
+  return {
+    libro: {
+      id: libro.id,
+      titulo: libro.titulo,
+      isbn: libro.isbn,
+      es_premium: libro.es_premium,
+    },
+    totalDisponibles: ejemplaresDisponibles.length,
+    ejemplares: ejemplaresDisponibles
+  };
+}
+
+
 async function actualizarEjemplar(id, datos) {
   const [filasActualizadas] = await Ejemplar.update(datos, {
     where: { id }
@@ -99,6 +142,7 @@ module.exports = {
   obtenerEjemplarPorCodigoBarra,
   crearEjemplar,
   obtenerEjemplarPorId,
+  obtenerEjemplaresDisponiblesDeUnLibro,
   obtenerTodosLosEjemplares,
   actualizarEjemplar,
   eliminarEjemplar,

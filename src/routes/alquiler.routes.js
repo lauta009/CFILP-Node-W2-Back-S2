@@ -18,9 +18,9 @@ router.get('/activos', checkRolYPermisos('admin',['gestionar_libros']),  alquile
 
 router.get('/vencidos', checkRolYPermisos('admin',['gestionar_libros']), alquilerController.obtenerAlquileresActivosVencidos);
 
-router.post('/regular', checkRolYPermisos('usuario',['alquilar_libro']),  crearAlquilerValidator, validarErrores, alquilerController.crearAlquilerRegular);
+router.post('/regular', checkRolYPermisos(['usuario', 'admin'],['alquilar_libro']),  crearAlquilerValidator, validarErrores, alquilerController.crearAlquilerRegular);
 
-router.post('/premium', checkRolYPermisos('usuario_premium',['alquilar_libro_premium']), crearAlquilerValidator, validarErrores, alquilerController.crearAlquilerPremium);
+router.post('/premium', checkRolYPermisos(['usuario_premium', 'admin'],['alquilar_libro_premium']), crearAlquilerValidator, validarErrores, alquilerController.crearAlquilerPremium);
 
 router.post('/devolucion', devolverAlquilerValidator, validarErrores, alquilerController.devolverEjemplar);
 

@@ -9,7 +9,7 @@ const {
   obtenerEjemplarPorCodigoBarraValidator
 } = require('../middlewares/validaciones/ejemplar.validaciones');
 const validarErrores = require('../middlewares/validaciones/validarErrores');
-const { checkRolYPermisos } = require('../middlewares/auth.middleware');
+const { checkRolYPermisos, authMiddleware } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
@@ -23,7 +23,8 @@ router.post(
 
 router.get(
   '/',
-  checkRolYPermisos(['usuario', 'admin', 'usuario_premium'],['consultar_ejemplar']), 
+  //authMiddleware,
+  //checkRolYPermisos(['usuario', 'admin', 'usuario_premium'],['consultar_ejemplar']), 
   obtenerTodosLosEjemplaresValidator, 
   validarErrores, 
   ejemplaresController.obtenerTodos
@@ -31,7 +32,8 @@ router.get(
 
 router.get(
   '/:id',
-  checkRolYPermisos(['usuario', 'admin', 'usuario_premium'],['consultar_ejemplar']),
+  //authMiddleware,
+  //checkRolYPermisos(['usuario', 'admin', 'usuario_premium'],['consultar_ejemplar']),
   obtenerEjemplarPorIdValidator, 
   validarErrores, 
   ejemplaresController.obtenerUno
@@ -39,10 +41,18 @@ router.get(
 
 router.get(
   '/ejemplares/codigo/:codigo_barra',
+  authMiddleware,
   checkRolYPermisos('admin', ['consultar_ejemplar']),
   obtenerEjemplarPorCodigoBarraValidator, 
   validarErrores, 
   ejemplaresController.obtenerPorCodigoBarra
+);
+
+router.get(
+  '/disponibles-por-libro', 
+  //authMiddleware,
+  //checkRolYPermisos(['admin', 'regular', 'premium'], ['consultar_ejemplar']), 
+  ejemplaresController.obtenerEjemplaresDisponiblesDeLibro
 );
 
 router.put(

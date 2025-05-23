@@ -62,11 +62,17 @@ app.use(globalErrorHandler);
 // Documentación con swagger
 setupSwagger(app);
 
+// Define el puerto que va a usar el servidor
+// Usa process.env.PORT para entornos de despliegue,
+// o el 3000 como default para desarrollo local.
+const PORT = process.env.PORT || 3000; 
+
 // Sincronización con la bbdd y arranque del servidor
 sync()
   .then(() => {
-    app.listen(3000, () => {
-      console.log('✅ Servidor corriendo en http://localhost:3000');
+    app.listen(PORT, () => { // Usa la variable PORT aquí
+      console.log(`✅ Servidor corriendo en http://localhost:${PORT}`); 
+      console.log(`Entorno: ${process.env.NODE_ENV || 'development'}`);
     });
   })
   .catch((err) => {

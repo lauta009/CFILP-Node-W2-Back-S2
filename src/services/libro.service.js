@@ -141,10 +141,10 @@ function _formatearLibroCompleto(libro) {
 function _construirWhereDeLaBusqueda(queryParam) {//
   const where = {};
   if (queryParam.titulo) {
-    where.titulo = { [Op.iLike]: `%${queryParam.titulo}%` };
+    where.titulo = { [Op.like]: `%${queryParam.titulo}%` };
   }
   if (queryParam.saga) {
-    where.saga_coleccion = { [Op.iLike]: `%${queryParam.saga}%` };
+    where.saga_coleccion = { [Op.like]: `%${queryParam.saga}%` };
   }
   return where;
 };
