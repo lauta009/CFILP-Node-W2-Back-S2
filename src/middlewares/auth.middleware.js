@@ -73,7 +73,7 @@ const checkRolYPermisos = (rolesNecesarios = null, permisosNecesariosParam = [])
     }
 
     if (!req.usuario) {
-      console.error('Error: req.usuario no está definido en checkRoleAndPermissions. Asegúrate de que authMiddleware se ejecuta primero.');
+
       return next(new UnauthorizedError('Usuario no autenticado.'));
     }
 

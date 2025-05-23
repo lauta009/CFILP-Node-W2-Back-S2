@@ -65,10 +65,12 @@ const register = async (req, res, next) => {
       cod_postal
     });
 
+
     if (!nuevoUsuario) {
       return next(new BadRequestError('Error al registrar el usuario en la base de datos.'));
     }
-    res.status(201).json(nuevoUsuario);
+    res.status(201).json({ message: 'Usuario creado correctamente',data: nuevoUsuario});
+
   } catch (error) {
     next(error);
   }

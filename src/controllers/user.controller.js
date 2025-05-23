@@ -23,7 +23,7 @@ const getById = async (req, res, next) => {
 const create = async (req, res, next) => {
   try {
     const nuevoUsuario = await usuarioService.createUsuario(req.body);
-    res.status(201).json('Usuario creado correctamente: ' + nuevoUsuario);
+    res.status(201).json({ message: 'Usuario creado correctamente',data: nuevoUsuario});
   } catch (err) {
     next(err);
   }
@@ -31,7 +31,7 @@ const create = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    console.log((req.body));
+
     const usuario = await usuarioService.updateUsuario(req.params.id, req.body);
     if (!usuario) return next(new NotFoundError('Usuario no encontrado'));
     res.json(usuario);
