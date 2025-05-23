@@ -12,7 +12,11 @@ const router = express.Router();
 
 router.get('/', checkRolYPermisos('admin',['gestionar_libros']), alquilerController.obtenerTodosLosAlquileres);
 
-router.get('/obtener-uno/:id', checkRolYPermisos('admin',['gestionar_libros']),  obtenerAlquilerPorIdValidator, validarErrores, alquilerController.obtenerAlquilerPorId);
+router.get('/obtener-uno/:id',
+  checkRolYPermisos('admin',['gestionar_libros']),
+  obtenerAlquilerPorIdValidator, 
+  validarErrores, 
+  alquilerController.obtenerAlquilerPorId);
 
 router.get('/activos', checkRolYPermisos('admin',['gestionar_libros']),  alquilerController.obtenerAlquileresActivos);
 

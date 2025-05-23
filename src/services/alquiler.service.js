@@ -208,7 +208,7 @@ async function obtenerAlquilerPorId(id) {
     ]
   });
   if (!alquiler) {
-    return next(new NotFoundError(`Alquiler con ID ${id} no encontrado.`));
+    throw new NotFoundError(`Alquiler con ID ${id} no encontrado.`);
   }
   return alquiler;
 }
