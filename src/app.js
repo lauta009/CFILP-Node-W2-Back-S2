@@ -2,7 +2,8 @@ const express = require('express');
 const dotenv = require('dotenv');
 const { sync } = require('../sequelize-db/config/database');
 //const setupSwagger = require('../docs/swagger');
-
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
 // Importación de las rutas
 const libroRoutes = require('./routes/libro.routes');
 const userRoutes = require('./routes/user.routes');
@@ -16,20 +17,21 @@ const {authMiddleware, permisosCheck} = require('./middlewares/auth.middleware')
 const esRutaPublica = require('./middlewares/rutasPublicas.middleware');
 
 dotenv.config(); 
-
+const path = require('path');
 const app = express();
 
 // Middlewares de aplicación
 app.use(express.urlencoded({ extended: true })); 
 app.use(express.json());
+const swaggerDocument = YAML.load(path.join(__dirname, '../docs/swagger.yml'));
 
 // Rutas públicas
 app.get('/', (req, res) => {
   res.send('Bienvenido a la API de la Biblioteca');
 });
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api/auth', authRoutes);
-app.get('/api/libros', libroRoutes);
-app.get('/api/ejemplares', ejemplarRoutes);
+
 
 // Middlewares de autenticación y permisos para las rutas protegidas
 app.use('/api', (req, res, next) => {

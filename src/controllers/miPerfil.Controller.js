@@ -71,7 +71,7 @@ const actualizarPassword = async (req, res) => {
 
     await usuarioService.updateUsuario(req.usuario.id, {password: usuarioExistente.password});
 
-    res.json({message:'Password actualizada con éxito'});
+    res.status(201).json({message:'Password actualizada con éxito'});
   } catch (error) {
     res
       .status(500)

@@ -1,0 +1,351 @@
+openapi: 3.0.0
+info:
+  title: API Biblioteca
+  version: 1.0.0
+  description: Documentación de la API para la gestión de libros, usuarios y alquileres
+
+servers:
+  - url: http://localhost:3000/api
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+paths:
+  /auth/login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+
+      responses:
+        "200":
+          description: Token de autenticación exitoso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        "401":
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Credenciales inválidas
+        "400":
+          description: Error en la solicitud
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Error en la solicitud
+
+  /auth/register:
+    post:
+      summary: Registro
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  description: Nombre del usuario
+                  example: Jaimito
+                apellido:
+                  type: string
+                  description: Apellido del usuario
+                  example: Pérez
+                email:
+                  type: string
+                  description: Correo electrónico del usuario
+                  example: jaimito.perez@gmail.com
+                password:
+                  type: string
+                  description: Contraseña del usuario de al menos 6 caracteres
+                  example: 123456
+                telefono:
+                  type: string
+                  description: Teléfono del usuario
+                  example: 2954368799
+                direccion:
+                  type: string
+                  description: Domicilio real del usuario
+                  example: Calle Falsa 123
+                localidad:
+                  type: string
+                  description: Localidad del usuario
+                  example: Buenos Aires
+                nro_doc:
+                  type: integer
+                  description: Número de documento del usuario
+                  example: 32123654
+                cod_postal:
+                  type: integer
+                  description: Código postal del usuario
+                  example: 1234
+              required:
+                - email
+                - password
+                - nombre
+                - apellido
+                - telefono
+                - direccion
+                - localidad
+                - nro_doc
+                - cod_postal
+      responses:
+        "201":
+          description: Usuario registrado
+        "400":
+          description: Error en la solicitud vinculado a la validación de datos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Error en la solicitud  
+  /mi_perfil/actualizarPassword:
+    put:
+      summary: Actualizar contraseña
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                password_actual:
+                  type: string
+                  description: Contraseña actual del usuario de al menos 6 caracteres
+                  example: 123456
+                password:
+                  type: string
+                  description: Nueva contraseña del usuario de al menos 6 caracteres
+                  example: 123456
+                password_confirm:
+                  type: string
+                  description: Confirmación de la nueva contraseña del usuario de al menos 6 caracteres
+                  example: 123456
+      responses:
+        "201":
+          description: Contraseña actualizada
+        "400":
+          description: Error en la solicitud vinculado a la validación de datos
+        "500":
+          description: Error interno del servidor
+            
+                     
+  /mi_perfil:
+    get:
+      summary: Obtener perfil
+      responses:
+        "200":
+          description: Detalles del perfil del usuario
+          
+  /mi_perfil/actualizarMiPerfil:
+    put:
+      summary: Actualizar perfil
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                  description: Nombre del usuario
+                  example: Jaimito
+                apellido:
+                  type: string
+                  description: Apellido del usuario
+                  example: Pérez
+                email:
+                  type: string
+                  description: Correo electrónico del usuario
+                  example: jaimito.perez2@gmail.com
+                password:
+                  type: string
+                  description: Contraseña del usuario de al menos 6 caracteres
+                  example: 123456
+                telefono:
+                  type: string
+                  description: Teléfono del usuario
+                  example: 2954368799
+                direccion:
+                  type: string
+                  description: Domicilio real del usuario
+                  example: Calle Falsa 321
+                localidad:
+                  type: string
+                  description: Localidad del usuario
+                  example: Buenos Aires
+                nro_doc:
+                  type: integer
+                  description: Número de documento del usuario
+                  example: 32123654
+                cod_postal:
+                  type: integer
+                  description: Código postal del usuario
+                  example: 1234
+  /libros:
+    get:
+      summary: Listar libros
+      responses:
+        "200":
+          description: Lista de libros
+
+    post:
+      summary: Crear nuevo libro
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                titulo:
+                  type: string
+                  description: Título del libro
+                  maxLength: 150
+                  example: El nombre del viento
+                saga_coleccion:
+                  type: string
+                  description: Saga o colección (opcional)
+                  maxLength: 100
+                  example: Crónica del asesino de reyes
+                editorial_id:
+                  type: integer
+                  description: ID de la editorial (opcional, debe existir en base de datos)
+                  example: 1
+                editorial:
+                  type: string
+                  description: Nombre de la editorial (opcional)
+                  maxLength: 255
+                  example: Penguin Random House
+                categoria_id:
+                  type: integer
+                  description: ID de la categoría (opcional, debe existir en base de datos)
+                  example: 2
+                categoria:
+                  type: string
+                  description: Nombre de la categoría (opcional)
+                  maxLength: 255
+                  example: Fantasía
+                fecha_publicacion:
+                  type: string
+                  format: date
+                  description: Fecha de publicación en formato YYYY-MM-DD
+                  example: 2007-03-27
+                isbn:
+                  type: string
+                  maxLength: 17
+                  description: Código ISBN válido (se verifica contra OpenLibrary)
+                  example: 9788401352836
+                resumen:
+                  type: string
+                  description: Resumen o sinopsis del libro
+                  example: Una historia épica sobre magia, conocimiento y destino.
+                portada_url:
+                  type: string
+                  format: uri
+                  description: URL de la portada del libro
+                  example: https://ejemplo.com/portada.jpg
+                idioma:
+                  type: string
+                  maxLength: 50
+                  description: Idioma del libro
+                  example: Español
+                nro_paginas:
+                  type: integer
+                  minimum: 1
+                  description: Número total de páginas
+                  example: 672
+                es_premium:
+                  type: boolean
+                  description: Indica si el libro es premium (true/false)
+                  example: false
+                autores:
+                  type: array
+                  description: Lista de IDs o nombres de autores (según tu implementación)
+                  items:
+                    type: string
+                  example: ["Patrick Rothfuss", "Otro Autor"]
+              required:
+                - titulo
+                - saga_coleccion
+                - editorial_id
+                - categoria_id
+                - fecha_publicacion
+                - isbn
+                - resumen
+
+
+      responses:
+        '201':
+          description: Libro creado exitosamente
+        '400':
+          description: Error en la validación de los datos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: El título es obligatorio   
+ 
+
+  /libros/obtener-uno/{id}:
+    get:
+      summary: Obtener libro por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Detalles del libro
+
+  /users:
+    get:
+      summary: Listar usuarios
+      responses:
+        "200":
+          description: Lista de usuarios
+
+
+  

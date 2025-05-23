@@ -59,7 +59,8 @@ const register = async (req, res) => {
       nro_doc,
       cod_postal
     });
-    res.status(201).json(nuevoUsuario);
+    res.status(201).json({ message: 'Usuario creado correctamente',data: nuevoUsuario});
+
   } catch (error) {
     console.error('Error al registrar usuario:', error);
     res.status(500).json({ error: 'Error al registrar usuario' });
