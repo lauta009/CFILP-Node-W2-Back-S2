@@ -10,7 +10,6 @@ function delay(ms) {
 async function registrarUsuario(userData) {
   try {
     const response = await axios.post(`${API_BASE_URL}/auth/register`, userData);
-    console.log('Registro exitoso:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error al registrar usuario:', error.response ? error.response.data : error.message);
@@ -21,7 +20,6 @@ async function registrarUsuario(userData) {
 async function iniciarSesion(credentials) {
   try {
     const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
-    console.log('Inicio de sesión exitoso:', response.data);
     return response.data.token;
   } catch (error) {
     console.error('Error al iniciar sesión:', error.response ? error.response.data : error.message);
@@ -29,12 +27,22 @@ async function iniciarSesion(credentials) {
   }
 }
 
-async function listarLibros() {
-  try {
-    const response = await axios.get(`${API_BASE_URL}/libros/?limit=5`); // Limitar a 5 libros
-    console.log('Lista de los primeros 5 libros ordenados alfabeticamente:', response.data);
+async function listarLibros(limit, page, filtro, detalle = basico) {
+  try {    
+    const response = await axios.get(`${API_BASE_URL}/libros/?limit=${limit}&page=${page}&${filtro}&detalle=${detalle}`); 
+    console.log('Lista de libros:', response.data);
+    return response.data; // Retorna la lista de libros
   } catch (error) {
     console.error('Error al listar libros:', error.response ? error.response.data : error.message);
+  }
+}
+
+async function buscarLibroPorSaga(saga) {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/libros/buscar/?saga=${saga}`);
+    return response.data; // Retorna el o los libros encontrados
+  } catch (error) {
+    console.error('Error al buscar libro por saga:', error.response ? error.response.data : error.message);
   }
 }
 
@@ -46,7 +54,6 @@ async function solicitarAlquilerRegular(token, ejemplarId) {
         headers: { Authorization: `Bearer ${token}` }
       }
     );
-    console.log(`Alquiler regular solicitado para ejemplar ${ejemplarId}:`, response.data);
     return response.data; // Retorna los datos del alquiler
   } catch (error) {
     console.error('Error al solicitar alquiler regular:', error.response ? error.response.data : error.message);
@@ -96,12 +103,17 @@ async function main() {
   let PAUSE_DURATION = 10000; 
 
   console.log('--- Iniciando simulación de cliente regular ---');
-  await delay(PAUSE_DURATION / 3); // Pausa inicial
+
+  await delay(PAUSE_DURATION/4); 
+
+  console.log('Usuario regular:', registroData);
 
   try {
     console.log('\n--- Paso 1: Registrar usuario (si no existe) ---');
+
     // Intentar registrar. Si ya existe, capturamos el error pero continuamos con el login.
     await delay(PAUSE_DURATION / 4); // Pausa 
+
     try {
       await registrarUsuario(registroData);
       console.log('Usuario registrado exitosamente.');
@@ -117,9 +129,9 @@ async function main() {
     await delay(PAUSE_DURATION); // Pausa de 10 segundos
 
     console.log('\n--- Paso 2: Iniciar sesión ---');
-    tokenRegular = await iniciarSesion({ email: registroData.email, password: registroData.password });
+    tokenRegular = await iniciarSesion({ email: registroData.email, password: registroData.password });;
 
-    await delay(PAUSE_DURATION); // Pausa de 10 segundos
+    await delay(PAUSE_DURATION/3); // Pausa 
 
   } catch (authError) {
     console.error('\n🚫 Simulación fallida en registro/inicio de sesión:', authError.message);
@@ -128,9 +140,10 @@ async function main() {
 
   if (tokenRegular) {
     console.log('\n✅ Usuario regular autenticado. Token obtenido.');
+    console.log('Token:', tokenRegular);
+    await delay(PAUSE_DURATION/3); 
 
     try {
-
       console.log('\n--- Paso 3: Consultar perfil ---');
       const perfil = await consultarPerfil(tokenRegular);
       if (perfil) {
@@ -141,14 +154,35 @@ async function main() {
       await delay(PAUSE_DURATION); // Pausa
 
       console.log('\n--- Paso 4: Listar libros ---');
-      await listarLibros();
+      console.log('El usuario consulta los primeros 3 libros de la categoría: Ficción');
+
+      await delay(PAUSE_DURATION/3); // Pausa
+
+      await listarLibros(3, 1, 'categoria=ficcion', 'basico'); // Listar libros
 
       await delay(PAUSE_DURATION); // Pausa
 
+      console.log('\n--- Paso 4.1: Busqueda de un libro  ---');
+      console.log('El usuario busca un libro por saga: "Señor de los Anillos"');
+      await delay(PAUSE_DURATION/3); // Pausa
+      const sagaBuscada = 'Señor de los Anillos';
+      const librosEncontrados = await buscarLibroPorSaga(sagaBuscada);  
+      if (librosEncontrados && librosEncontrados.length > 0) {
+        console.log(`Libros encontrados para la saga "${sagaBuscada}":`, librosEncontrados);
+      }else{
+        console.warn('No se pudieron encontra libros por esa saga');
+      }
+
+      await delay(PAUSE_DURATION/3);
+
       console.log('\n--- Paso 5: Solicitar alquiler ---');
-      const alquiler = await solicitarAlquilerRegular(tokenRegular, ejemplarParaAqluilarId);
-      if (alquiler) {
-        console.log('Alquiler exitoso:', alquiler);
+
+      console.log('\nEl usuario solicita el alquiler del ejemplar con id=4 perteneciente al libro titulado Moscú 2042, el cual no es premium');
+
+
+      const alquiler2 = await solicitarAlquilerRegular(tokenRegular, ejemplarParaAqluilarId);
+      if (alquiler2) {
+        console.log('Alquiler exitoso:', alquiler2);
       } else {
         console.warn('El alquiler no fue exitoso.');
       }
@@ -156,10 +190,10 @@ async function main() {
       await delay(PAUSE_DURATION); // Pausa
 
       // Solo intentar devolver si el alquiler fue exitoso
-      if (alquiler) {
+      if (alquiler2) {
         console.log('\n--- Paso 6: Devolver libro ---');
         await devolverLibro(tokenRegular, ejemplarParaAqluilarId);
-        console.log('Devolución exitosa.');
+        console.log('Devolución exitosa del ejemplar.');
 
         await delay(PAUSE_DURATION); // Pausa
         

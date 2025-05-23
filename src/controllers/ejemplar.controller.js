@@ -38,6 +38,43 @@ const ejemplaresController = {
     }
   },
 
+  async obtenerEjemplaresDisponiblesDeLibro (req, res, next) {
+    try {
+      const { id, titulo } = req.query; 
+
+      let identificadorParaServicio;
+
+      if (id) {
+        identificadorParaServicio = parseInt(id, 10);
+        if (isNaN(identificadorParaServicio)) {
+          return next(new BadRequestError('El ID proporcionado no es un número válido.'));
+        }
+      } else if (titulo) {
+        identificadorParaServicio = titulo;
+      } else {
+        return next(new BadRequestError('Se requiere un ID o un título de libro en los parámetros de consulta (query).'));
+      }
+
+      // Llama al servicio con el identificador consolidado
+      const resultado = await ejemplaresService.obtenerEjemplaresDisponiblesDeUnLibro(identificadorParaServicio);
+
+      if (resultado.totalDisponibles === 0) {
+        return res.status(200).json({
+          status: 'success',
+          message: `El libro "${resultado.libro.titulo}" no tiene ejemplares disponibles actualmente.`,
+          data: resultado
+        });
+      }
+
+      res.status(200).json({
+        status: 'success',
+        data: resultado
+      });
+    } catch (error) {
+      next(error);
+    }
+  },
+
   async obtenerTodos(req, res, next) {
     try {
       const ejemplares = await ejemplaresService.obtenerTodosLosEjemplares(req.query);

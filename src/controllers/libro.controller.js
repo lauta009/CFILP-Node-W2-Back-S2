@@ -48,7 +48,7 @@ const libroController = {
   async buscarLibrosController(req, res, next) {
     try {
       const { titulo, saga } = req.query;
-      const resultados = await libroService.buscarLibros({ titulo, saga });
+      const resultados = await libroService.buscarLibrosPorCondicion({ titulo, saga });
       res.status(200).json(resultados);
       if (resultados.length === 0) {
         return next(new NotFoundError('No se encontraron libros con esos criterios.'));
