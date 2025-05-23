@@ -1,51 +1,55 @@
 const usuarioService = require('../services/user.service');
+const { NotFoundError, BadRequestError } = require('../utils/appErrors');
 
-const getAll = async (req, res) => {
+const getAll = async (req, res, next) => {
   try {
     const usuarios = await usuarioService.getAllUsuarios();
     res.json(usuarios);
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: 'Error al obtener los usuarios' });
+    next(err);
   }
 };
 
-const getById = async (req, res) => {
+const getById = async (req, res, next) => {
   try {
     const usuario = await usuarioService.getUsuarioById(req.params.id);
-    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (!usuario) return next(new NotFoundError('Usuario no encontrado'));
     res.json(usuario);
   } catch (err) {
-    res.status(500).json({ error: 'Error al obtener el usuario' });
+    next(err);
   }
 };
 
-const create = async (req, res) => {
+const create = async (req, res, next) => {
   try {
     const nuevoUsuario = await usuarioService.createUsuario(req.body);
     res.status(201).json({ message: 'Usuario creado correctamente',data: nuevoUsuario});
   } catch (err) {
-    res.status(500).json({ error: 'Error al crear el usuario', err: err.message });
+    next(err);
   }
 };
 
-const update = async (req, res) => {
+const update = async (req, res, next) => {
   try {
+
     const usuario = await usuarioService.updateUsuario(req.params.id, req.body);
-    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (!usuario) return next(new NotFoundError('Usuario no encontrado'));
     res.json(usuario);
   } catch (err) {
-    res.status(500).json({ error: 'Error al actualizar el usuario' });
+    next(err);
   }
 };
 
-const remove = async (req, res) => {
+const remove = async (req, res, next) => {
   try {
     const eliminado = await usuarioService.updateUsuario(req.params.id, { estado: false });
-    if (!eliminado) return res.status(404).json({ error: 'Usuario no encontrado' });
+
+    if (!eliminado) return next(new NotFoundError('Usuario no encontrado'));
+    if (eliminado.estado === false) return next(new BadRequestError('El usuario ya estaba eliminado o sancionado'));
+    
     res.status(200).json({ message: 'Usuario eliminado correctamente' });
   } catch (err) {
-    res.status(500).json({ error: 'Error al eliminar el usuario' });
+    next(err);
   }
 };
 

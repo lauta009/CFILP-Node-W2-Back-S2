@@ -1,9 +1,11 @@
 const { Libro, Autor, Categoria, Editorial, Ejemplar, Alquiler } = require('../models');
 const { validarISBNconOpenLibrary } = require('../utils/externalApis');
+const { NotFoundError, ConflictError, BadRequestError } = require('../utils/appErrors');
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 
-// Funciones auxiliares para crear libro. Buscan si existe un registro en la entidad relacionada o sino lo crean
+// Funciones auxiliares para crear libro. Buscan si existe un registro en la entidad relacionada o si no LO CREA!
+//Permite al usuario ingresar el ID o el nombre de la entidad relacionada (ej. editorial y categoría)
 async function _obtenerOcrearEntidad(Modelo, valor, campo = 'nombre') {
   if (!valor) {
     return null; 
@@ -11,7 +13,7 @@ async function _obtenerOcrearEntidad(Modelo, valor, campo = 'nombre') {
   if (typeof valor === 'number') {
     const entidad = await Modelo.findByPk(valor);
 
-    if (!entidad) throw new Error(`${Modelo.nombre} con ID ${valor} no existe`);
+    if (!entidad) throw new NotFoundError(`${Modelo.name} con ID ${valor} no existe.`);
     return entidad;
 
   } else if (typeof valor === 'string') {
@@ -20,7 +22,7 @@ async function _obtenerOcrearEntidad(Modelo, valor, campo = 'nombre') {
     });
     return entidad;
   }
-  throw new Error(`Formato no válido para ${Modelo.nombre}`);
+  throw new BadRequestError(`Formato no válido para ${Modelo.name}. Se esperaba ID o nombre.`);
 }
 
 async function _obtenerOcrearAutores(autoresInput) {
@@ -32,7 +34,7 @@ async function _obtenerOcrearAutores(autoresInput) {
     if (typeof autorInput === 'number') {
       const autor = await Autor.findByPk(autorInput);
 
-      if (!autor) throw new Error(`Autor con ID ${autorInput} no existe`);
+      if (!autor) throw new NotFoundError(`Autor con ID ${autorInput} no existe.`);
       return autor;
 
     } else if (typeof autorInput === 'string') {
@@ -41,13 +43,13 @@ async function _obtenerOcrearAutores(autoresInput) {
       });
       return autor;
     }
-    throw new Error('Formato no válido para el autor');
+    throw new BadRequestError('Formato no válido para el autor. Se esperaba ID o nombre.');
   });
 
   return await Promise.all(autores);
 }
 
-async function _verificarISBNenLaDb(isbn, idIgnorar = null) {
+async function _verificarISBNUnico(isbn, idIgnorar = null) {
   const where = { isbn };
   if (idIgnorar) {
     where.id = { [Op.ne]: idIgnorar }; // Excluir el libro actual cuando se actualiza un libro
@@ -55,12 +57,12 @@ async function _verificarISBNenLaDb(isbn, idIgnorar = null) {
 
   const existente = await Libro.findOne({ where });
   if (existente) {
-    throw new Error(`Ya existe un libro con el ISBN ${isbn}`);
+    throw new ConflictError(`Ya existe un libro con el ISBN ${isbn}.`);
   }
 }
 
 // Funciónes auxiliares para formatear info de lista de libros
-async function _aplicarFiltroEditorial(include, editorial) {
+function _aplicarFiltroEditorial(include, editorial) {
   if (editorial) {
     include.push({
       model: Editorial,
@@ -79,16 +81,16 @@ async function _aplicarFiltroEditorial(include, editorial) {
   }
 }
 
-async function _aplicarFiltroAutor(include, autor) {
-  if (autor) {
+function _aplicarFiltroAutor(include, autor) {
+  if (autor && autor.trim().length > 0) {
     include.push({
       model: Autor,
       as: 'autores',
-      attributes: ['nombre', 'apeliido'],
+      attributes: ['nombre', 'apellido'],
       through: { attributes: [] },
       where: { [Op.or]: [
-        { nombre: { [Op.iLike]: `%${query.autor}%` } },
-        { apellido: { [Op.iLike]: `%${query.autor}%` } }
+        { nombre: { [Op.like]: `%${autor}%` } },
+        { apellido: { [Op.like]: `%${autor}%` } }
       ] 
       },
       required: true,
@@ -110,6 +112,8 @@ function _formatearLibroBasico(libro) {
     id: libro.id,
     titulo: libro.titulo,
     isbn: libro.isbn,
+    saga_coleccion: libro.saga_coleccion,
+    es_premium: libro.es_premium,
     categoria: libro.categoria ? libro.categoria.nombre : null,
     ejemplares: libro.ejemplares ? libro.ejemplares.map(e => e.codigo_barra) : [],
   };
@@ -171,7 +175,7 @@ async function listarLibros({ categoria, editorial, autor, page, limit, detalle 
       required: false,
     }
   ];
-  const atributosBase = ['id', 'titulo', 'isbn', 'categoria_id']; //Para el detalle básico
+  const atributosBase = ['id', 'titulo', 'saga_coleccion', 'isbn', 'categoria_id', 'es_premium']; //Para el detalle básico
   let attributes = [...atributosBase];
 
   if (detalle === 'completo') {
@@ -181,11 +185,11 @@ async function listarLibros({ categoria, editorial, autor, page, limit, detalle 
       'resumen',
       'idioma',
       'nro_paginas',
-      'es_premium',
       'editorial_id'
     );
-    await _aplicarFiltroEditorial(include, editorial);
-    await _aplicarFiltroAutor(include, autor);
+    // Agregar atributos de detalle completo
+    _aplicarFiltroEditorial(include, editorial);
+    _aplicarFiltroAutor(include, autor);
   } 
 
   try {
@@ -217,17 +221,27 @@ async function listarLibros({ categoria, editorial, autor, page, limit, detalle 
 };
 
 const obtenerLibroPorId = async (id) => {
-  return await Libro.findByPk(id, {
+  const libro = await Libro.findByPk(id, {
     include: ['editorial', 'categoria', 'autores']
   });
+  if (!libro) {
+    throw new NotFoundError(`Libro con ID ${id} no encontrado.`);
+  }
+  return libro;
 };
 
 const buscarLibrosPorCondicion = async (queryParam) => {
   const whereClause = _construirWhereDeLaBusqueda(queryParam);
-  return await Libro.findAll({
+
+  const libros = await Libro.findAll({
     where: whereClause,
-    include: ['categoria', 'editorial', 'autores'], 
+    include: ['categoria', 'editorial', 'autores'],
   });
+    
+  if (libros.length === 0) {
+    throw new NotFoundError('No se encontraron libros con los criterios de búsqueda proporcionados.');
+  }
+  return libros;
 };
 
 async function crearLibro(datos) {
@@ -250,12 +264,25 @@ async function crearLibro(datos) {
 
   if (isbn) {
     await validarISBNconOpenLibrary(isbn);
-    await _verificarISBNenLaDb(isbn);
+    await _verificarISBNUnico(isbn);
+
   }
 
   const categoriaFinal = await _obtenerOcrearEntidad(Categoria, categoria_id || categoria);
+  if (!categoriaFinal) {
+    throw new NotFoundError(`Categoría con ID ${categoria_id} no encontrada.`); 
+  }
   const editorialFinal = await _obtenerOcrearEntidad(Editorial, editorial_id || editorial);
+  if (!editorialFinal) {
+    throw new NotFoundError(`Editorial con ID ${editorial_id} no encontrada.`);
+  }
   const autoresFinal = await _obtenerOcrearAutores(autores);
+  if (autoresFinal.length === 0) {
+    throw new NotFoundError('No se encontraron autores válidos.');  
+  }
+  if (autoresFinal.length > 5) {
+    throw new BadRequestError('No se pueden agregar más de 5 autores por libro.');
+  }
 
   const nuevoLibro = await Libro.create({
     titulo,
@@ -271,30 +298,46 @@ async function crearLibro(datos) {
     editorial_id: editorialFinal ? editorialFinal.id : null,
   });
 
+  if (!nuevoLibro) {
+    throw new ConflictError('No se pudo crear el libro.'); 
+  }
+
   await nuevoLibro.setAutores(autoresFinal);
 
-  return await Libro.findByPk(nuevoLibro.id, {
+  const nuevoLibroEnDB = await Libro.findByPk(nuevoLibro.id, {
     include: ['categoria', 'editorial', 'autores']
   });
+
+  if (!nuevoLibroEnDB) {
+    throw new NotFoundError(`Libro con ID ${nuevoLibro.id} no encontrado después de la creación.`);
+  }
+
+  return nuevoLibroEnDB;
 }
 
 const actualizarLibro = async (id, datos) => {
-  const libro = await Libro.findByPk(id);
+    
+  const libro = await obtenerLibroPorId(id); 
 
-  if (!libro) throw new Error('Libro no encontrado');
-  
-  if (datos.isbn) {
-    await validarISBNconOpenLibrary(datos.isbn);
-    await verificarISBNunico(datos.isbn, id);
+  if (!libro) {
+    throw new NotFoundError(`Libro con ID ${id} no encontrado.`); 
+  }
+
+  if (datos.isbn && datos.isbn !== libro.isbn) { 
+    await validarISBNconOpenLibrary(datos.isbn); 
+    await _verificarISBNUnico(datos.isbn, id); 
   }
   await libro.update(datos);
   return await obtenerLibroPorId(id);
 };
 
 const eliminarLibro = async (id) => {
-  const libro = await Libro.findByPk(id);
-  if (!libro) throw new Error('Libro no encontrado');
-  await libro.destroy();
+  const libro = await obtenerLibroPorId(id); 
+  const elimicaion = await libro.destroy();
+  if (!elimicaion) {
+    throw new NotFoundError(`No se pudo eliminar el libro con ID ${id}.`);
+  }
+  return true; 
 };
 
 async function obtenerMetricasLibros() {
@@ -313,6 +356,10 @@ async function obtenerMetricasLibros() {
         },
       ],
     });
+
+    if (ejemplaresPorLibro.length === 0) {
+      throw new NotFoundError('No se encontraron libros con ejemplares.');
+    }
 
     const ejemplaresPorLibroConteo = ejemplaresPorLibro.map(libro => {
       const todosLosEjemplares = libro.ejemplares.length;
@@ -348,6 +395,10 @@ async function obtenerLibrosConEjemplares() {
         attributes: ['codigo_barra', 'estado']
       }]
     });
+
+    if (libros.length === 0) {
+      throw new NotFoundError('No se encontraron libros con ejemplares.');
+    }
     return libros;
   } catch (error) {
     console.error('Error al obtener libros con sus ejemplares:', error);
@@ -368,6 +419,9 @@ async function obtenerLibrosConEjemplaresPorEstado(estado) {
       group: ['Libro.id'],
       having: sequelize.literal('COUNT(ejemplares.id) > 0') 
     });
+    if (librosConCantidad.length === 0) {
+      throw new NotFoundError(`No se encontraron libros con ejemplares en estado ${estado}.`);
+    }
     return librosConCantidad;
   } catch (error) {
     console.error(`Error al obtener libros con ejemplares en estado ${estado}:`, error);
@@ -399,6 +453,10 @@ async function obtenerLibrosMasAlquiladosHistorico() {
       order: [[sequelize.literal('total_alquileres'), 'DESC']],
       raw: true,
     });
+
+    if (librosMasAlquilados.length === 0) {
+      throw new NotFoundError('No se encontraron libros alquilados.');
+    }
 
     return librosMasAlquilados.map(libro => ({
       id: libro.id,

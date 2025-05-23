@@ -1,21 +1,20 @@
 const libroService = require('../services/libro.service');
+const { NotFoundError } = require('../utils/appErrors');
 
 const libroController = {
-
-  async crear(req, res) {
+  
+  async crear(req, res, next) {
     try {
       const nuevoLibro = await libroService.crearLibro(req.body);
       res.status(201).json(nuevoLibro);
     } catch (error) {
-      console.error('Error al crear el libro:', error);
-      res.status(400).json({
-        error: 'Error al crear el libro',
-        detalles: error.message
-      });
+      next(error);
     }
   },
-
-  async listar(req, res) {
+  
+  // Método para listar libros con filtros y paginación
+  // Se pueden filtrar por categoría, editorial y autor
+  async listar(req, res, next) {
     try {
       const { categoria, editorial, autor, page, limit, detalle } = req.query;
       const params = {
@@ -23,98 +22,102 @@ const libroController = {
         editorial: editorial ?? null,
         autor: autor ?? null,
         page: page ?? 1,
-        limit: limit ?? 10,
+        limit: limit ?? 100000,
         detalle: detalle ?? 'completo', 
       };
       const resultado = await libroService.listarLibros(params);
       res.status(200).json(resultado);
     } catch (error) {
-      console.error('Error al obtener los libros:', error);
-      res.status(500).json({ error: 'Error al obtener los libros' });
+      next(error);
     }
   },
 
-
-  async obtenerPorId(req, res) {
+  async obtenerPorId(req, res, next) {
     try {
       const libro = await libroService.obtenerLibroPorId(req.params.id);
       if (!libro) {
-        return res.status(404).json({ error: 'Libro no encontrado' });
+        return next(new NotFoundError('Libro no encontrado.'));
       }
       res.status(200).json(libro);
     } catch (error) {
-      console.error('Error al obtener el libro:', error);
-      res.status(500).json({ error: 'Error al obtener el libro' });
+      next(error);
     }
   },
-
-  async buscarLibrosController(req, res) {
+  	
+  // Método para buscar libros por título o saga	
+  async buscarLibrosController(req, res, next) {
     try {
       const { titulo, saga } = req.query;
       const resultados = await libroService.buscarLibros({ titulo, saga });
       res.status(200).json(resultados);
+      if (resultados.length === 0) {
+        return next(new NotFoundError('No se encontraron libros con esos criterios.'));
+      }
     } catch (error) {
-      console.error('Error al buscar libros:', error);
-      res.status(500).json({ error: 'No se pudieron buscar los libros' });
+      next(error);
     }
   },
 
-  async actualizar(req, res) {
+  async actualizar(req, res, next) {
     try {
       const libroActualizado = await libroService.actualizarLibro(req.params.id, req.body);
       res.status(200).json(libroActualizado);
+
+      if (!libroActualizado) {
+        return next(new NotFoundError('Libro no encontrado para actualizar.'));
+      }
     } catch (error) {
-      console.error('Error al actualizar el libro:', error);
-      res.status(400).json({ error: 'Error al actualizar el libro', detalles: error.message });
+      next(error);
     }
   },
 
-
-  async eliminar(req, res) {
+  async eliminar(req, res, next) {
     try {
       await libroService.eliminarLibro(req.params.id);
+      if (!eliminado) {
+        return next(new NotFoundError('Libro no encontrado para eliminar.'));
+      };
       res.status(204).send();
     } catch (error) {
-      console.error('Error al eliminar el libro:', error);
-      res.status(500).json({ error: 'Error al eliminar el libro', detalles: error.message });
+      next(error);
     }
   },
 
   //Metodos de  consultas con relación a ejemplares y alquileres
-  async obtenerMetricasLibros(req, res) {
+  async obtenerMetricasLibros(req, res, next) {
     try {
       const metricas = await libroService.obtenerMetricasLibros();
       res.status(200).json(metricas);
     } catch (error) {
-      res.status(500).json({ error: 'Error al obtener las métricas de libros', detalles: error.message });
+      next(error);
     }
   },
 
-  async obtenerLibrosConEjemplares(req, res) {
+  async obtenerLibrosConEjemplares(req, res, next) {
     try {
       const librosConEjemplares = await libroService.obtenerLibrosConEjemplares();
       res.status(200).json(librosConEjemplares);
     } catch (error) {
-      res.status(500).json({ error: 'Error al obtener libros con sus ejemplares', detalles: error.message });
+      next(error);
     }
   },
 
-  async obtenerLibrosConEjemplaresPorEstado(req, res) {
+  async obtenerLibrosConEjemplaresPorEstado(req, res, next) {
     const estado = req.params.estado ?? 'disponible'; 
     try {
       const librosPorEstado = await libroService.obtenerLibrosConEjemplaresPorEstado(estado);
       res.status(200).json(librosPorEstado);
     } catch (error) {
-      res.status(500).json({ error: `Error al obtener libros con ejemplares ${estado}`, detalles: error.message });
+      next(error);
     }
   },
 
-  async obtenerLibrosMasAlquiladosHistorico(req, res) {
+  async obtenerLibrosMasAlquiladosHistorico(req, res, next) {
     try {
       const librosMasAlquilados = await libroService.obtenerLibrosMasAlquiladosHistorico();
       res.status(200).json(librosMasAlquilados);
     } catch (error) {
-      res.status(500).json({ error: 'Error al obtener los libros más alquilados históricamente', detalles: error.message });
+      next(error);
     }
   },
 };

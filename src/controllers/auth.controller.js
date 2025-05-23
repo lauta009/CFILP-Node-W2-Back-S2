@@ -1,48 +1,53 @@
 const jwt = require('jsonwebtoken');
 const {createUsuario, updateUsuario} = require('../services/user.service');
 const authService = require('../services/auth.service');
+const { NotFoundError, BadRequestError, UnauthorizedError, ForbiddenError, ConflictError} = require('../utils/appErrors');
 
 
-async function login(req, res) {
+
+async function login(req, res, next) {
   try {
     const { email, password } = req.body;
     const usuario = await authService.buscarPorEmail(email);
     if (!usuario) {
-      console.log('Usuario no encontrado en la bbdd');
-      return res.status(401).json({ error: 'Credenciales inválidas' });
+      return next(new NotFoundError('Usuario no encontrado.'));
     }
     const passwordValido = await authService.validarPassword(password, usuario.password);
     if (!passwordValido) {
-      console.log('Contraseña inválida');
-      return res.status(401).json({ error: 'Credenciales inválidas' });
+      return next(new BadRequestError('Contraseña incorrecta.'));
     }
     if(!usuario.estado){
-      console.log('Usuario inactivo');
-      return res.status(401).json({ error: 'Usuario inactivo' });
+      return next(new ForbiddenError('Usuario inactivo.'));
     }
     // Generar el token JWT
     const token = jwt.sign({ id: usuario.id, rol_id:usuario.rol_id}, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN, 
     });
 
+    if (!token) {
+      return next(new UnauthorizedError('Error al generar el token.'));
+    }
+
     usuario.ultimo_login = new Date();
 
-    await updateUsuario(usuario.id, {ultimo_login:usuario.ultimo_login});
+    const ultimoLogin = await updateUsuario(usuario.id, {ultimo_login:usuario.ultimo_login});
+    if (!ultimoLogin) {
+      return next(new BadRequestError('Error interno al loguearse'));
+    }
     
     res.json({ token });
   } catch (error) {
-    console.error('Error al iniciar sesión:', error);
-    res.status(500).json({ error: 'Error al iniciar sesión' });
+    next(error);
   }
 }
 
-const register = async (req, res) => {
+const register = async (req, res, next) => {
   try {
     const { nombre, apellido, email, password, telefono, direccion, localidad, nro_doc, cod_postal  } = req.body;
     // Validar que el email no esté ya registrado
     const usuarioExistente = await authService.buscarPorEmail(email);
     if (usuarioExistente) {
-      return res.status(400).json({ error: 'El email ya está registrado' });
+      return next(new ConflictError('El email ya está registrado en esta base de datos. Por favor, utiliza otro.'));
     }
     const hashedPassword = await authService.hashPassword(password);
 
@@ -59,13 +64,18 @@ const register = async (req, res) => {
       nro_doc,
       cod_postal
     });
+
+
+    if (!nuevoUsuario) {
+      return next(new BadRequestError('Error al registrar el usuario en la base de datos.'));
+    }
     res.status(201).json({ message: 'Usuario creado correctamente',data: nuevoUsuario});
 
   } catch (error) {
-    console.error('Error al registrar usuario:', error);
-    res.status(500).json({ error: 'Error al registrar usuario' });
+    next(error);
   }
 };
+
 module.exports = {
   login,
   register,

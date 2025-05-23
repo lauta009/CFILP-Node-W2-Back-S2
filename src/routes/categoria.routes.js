@@ -7,19 +7,21 @@ const {
   eliminarCategoriaValidaciones,
 } = require('../middlewares/validaciones/categoria.validaciones');
 const validarErrores = require('../middlewares/validaciones/validarErrores');
+const { checkRolYPermisos } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
-router.post('/', crearCategoriaValidaciones, validarErrores, categoriaController.crearCategoriaController);
+router.post('/', checkRolYPermisos(['admin'], ['gestionar_categorias']), crearCategoriaValidaciones, validarErrores, categoriaController.crearCategoriaController);
 
 router.get('/obtener-una/:id', obtenerCategoriaPorIdValidaciones, validarErrores, categoriaController.obtenerCategoriaPorIdController);
 
-router.put('/:id', actualizarCategoriaValidaciones, validarErrores, categoriaController.actualizarCategoriaController);
+router.put('/:id', checkRolYPermisos(['admin'], ['gestionar_categorias']),  actualizarCategoriaValidaciones, validarErrores, categoriaController.actualizarCategoriaController);
 
-router.delete('/:id', eliminarCategoriaValidaciones, validarErrores, categoriaController.eliminarCategoriaController);
+router.delete('/:id', checkRolYPermisos(['admin'], ['gestionar_categorias']),  eliminarCategoriaValidaciones, validarErrores, categoriaController.eliminarCategoriaController);
 
-router.get('/arbol', categoriaController.obtenerCategoriasArbolController);
-router.get('/arbol-con-libros', categoriaController.obtenerCategoriasArbolConLibrosController);
+router.get('/arbol', checkRolYPermisos(['admin'], ['consultar_categorias']),  categoriaController.obtenerCategoriasArbolController);
+
+router.get('/arbol-con-libros', checkRolYPermisos(['admin'], ['consultar_categorias']), categoriaController.obtenerCategoriasArbolConLibrosController);
 
 router.get('/', categoriaController.obtenerTodasLasCategoriasController);
 

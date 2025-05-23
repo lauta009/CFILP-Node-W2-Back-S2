@@ -1,9 +1,14 @@
 const express = require('express');
 const dotenv = require('dotenv');
+
 const { sync } = require('../sequelize-db/config/database');
-//const setupSwagger = require('../docs/swagger');
+
+const globalErrorHandler = require('./middlewares/errorHandler.middleware');
+const { NotFoundError } = require('./utils/appErrors');
+
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
+
 // Importación de las rutas
 const libroRoutes = require('./routes/libro.routes');
 const userRoutes = require('./routes/user.routes');
@@ -13,11 +18,13 @@ const ejemplarRoutes = require('./routes/ejemplar.routes');
 const alquilerRoutes = require('./routes/alquiler.routes');
 const categoriaRoutes = require('./routes/categoria.routes');
 
-const {authMiddleware, permisosCheck} = require('./middlewares/auth.middleware');
+const {authMiddleware, } = require('./middlewares/auth.middleware');
 const esRutaPublica = require('./middlewares/rutasPublicas.middleware');
+
 
 dotenv.config(); 
 const path = require('path');
+
 const app = express();
 
 // Middlewares de aplicación
@@ -41,13 +48,6 @@ app.use('/api', (req, res, next) => {
   authMiddleware(req, res, next);
 });
 
-app.use('/api', (req, res, next) => {
-  if (esRutaPublica(req)) {
-    return next(); // Saltar el middleware de permisos
-  }
-  permisosCheck(req, res, next);
-});
-
 // Rutas protegidas
 app.use('/api/libros', libroRoutes);
 app.use('/api/alquileres', alquilerRoutes);
@@ -56,11 +56,15 @@ app.use('/api/ejemplares', ejemplarRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/mi-perfil', mi_perfilRoutes);
 
+
+// Si una ruta no coincide con ninguna de las definidas arriba, llegará aquí.
+app.use((req, res, next) => {
+  next(new NotFoundError(`No se puede encontrar ${req.originalUrl} en este servidor!`));
+});
+
 // Manejador de errores
+app.use(globalErrorHandler);
 
-
-// Documentación con swagger
-//setupSwagger(app);
 
 // Sincronización con la bbdd y arranque del servidor
 sync()

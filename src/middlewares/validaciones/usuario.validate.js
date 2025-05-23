@@ -8,27 +8,28 @@ const validarRegisterUsuario = [
     .withMessage('El nombre debe tener al menos 2 caracteres'),
   body('apellido')
     .notEmpty()
-    .withMessage('El nombre es obligatorio')
+    .withMessage('El apellido es obligatorio') 
     .isLength({ min: 2 })
-    .withMessage('El nombre debe tener al menos 2 caracteres'),
+    .withMessage('El apellido debe tener al menos 2 caracteres'),
+    
+  // CAMPOS OPCIONALES:
   body('direccion')
-    .notEmpty()
-    .withMessage('La dirección es obligatoria')
+    .optional() 
     .isLength({ min: 5 })
     .withMessage('La dirección debe tener al menos 5 caracteres'),
   body('localidad')
-    .notEmpty()
-    .withMessage('La localidad es obligatoria')
+    .optional() 
     .isLength({ min: 2 })
     .withMessage('La localidad debe tener al menos 2 caracteres'),
   body('nro_doc')
     .notEmpty()
     .withMessage('El número de documento es obligatorio')
     .isLength({ min: 7 })
-    .withMessage('El número de documento debe tener al menos 7 caracteres'),
+    .withMessage('El número de documento debe tener al menos 7 caracteres')
+    .isNumeric()
+    .withMessage('El número de documento debe ser numérico'),
   body('cod_postal')
-    .notEmpty()
-    .withMessage('El código postal es obligatorio')
+    .optional() 
     .isLength({ min: 4 })
     .withMessage('El código postal debe tener al menos 4 caracteres'),
   body('email')
@@ -36,20 +37,18 @@ const validarRegisterUsuario = [
     .withMessage('El email es obligatorio')
     .isEmail()
     .withMessage('Debe ser un email válido'),
-
   body('password')
     .notEmpty()
     .withMessage('La contraseña es obligatoria')
     .isLength({ min: 6 })
     .withMessage('La contraseña debe tener al menos 6 caracteres'),
-    
-
   body('telefono')
-    .notEmpty()
-    .withMessage('El teléfono es obligatorio')
+    .optional()
     .isLength({ min: 10 })
     .withMessage('El teléfono debe tener al menos 10 caracteres'),
 ];
+
+
 const loginUsuarioValidate = [
   body('email')
     .notEmpty()
@@ -75,17 +74,22 @@ const validarMiPerfilUsuario = [
     .isLength({ min: 2 })
     .withMessage('El nombre debe tener al menos 2 caracteres'),
   body('direccion')
+    .optional()
     .isLength({ min: 5 })
     .withMessage('La dirección debe tener al menos 5 caracteres'),
   body('localidad')
+    .optional()
     .isLength({ min: 2 })
     .withMessage('La localidad debe tener al menos 2 caracteres'),
   body('nro_doc')
     .notEmpty()
     .withMessage('El número de documento es obligatorio')
+    .isNumeric()
+    .withMessage('El número de documento debe ser numérico')
     .isLength({ min: 7 })
     .withMessage('El número de documento debe tener al menos 7 caracteres'),
   body('cod_postal')
+    .optional()
     .isLength({ min: 4 })
     .withMessage('El código postal debe tener al menos 4 caracteres'),
   body('email')
@@ -94,6 +98,7 @@ const validarMiPerfilUsuario = [
     .isEmail()
     .withMessage('Debe ser un email válido'),
   body('telefono')
+    .optional()
     .isLength({ min: 10 })
     .withMessage('El teléfono debe tener al menos 10 caracteres'),
 ];

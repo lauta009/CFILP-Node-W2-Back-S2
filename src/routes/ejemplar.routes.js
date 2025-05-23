@@ -9,19 +9,21 @@ const {
   obtenerEjemplarPorCodigoBarraValidator
 } = require('../middlewares/validaciones/ejemplar.validaciones');
 const validarErrores = require('../middlewares/validaciones/validarErrores');
-const { obtenerEjemplarPorCodigoBarra } = require('../services/ejemplar.service');
+const { checkRolYPermisos } = require('../middlewares/auth.middleware');
 
 const router = express.Router();
 
 router.post(
   '/',
+  checkRolYPermisos('admin',['gestionar_ejemplar']),
   crearEjemplarValidator,
   validarErrores, 
   ejemplaresController.crear
 );
 
 router.get(
-  '/', 
+  '/',
+  checkRolYPermisos(['usuario', 'admin', 'usuario_premium'],['consultar_ejemplar']), 
   obtenerTodosLosEjemplaresValidator, 
   validarErrores, 
   ejemplaresController.obtenerTodos
@@ -29,6 +31,7 @@ router.get(
 
 router.get(
   '/:id',
+  checkRolYPermisos(['usuario', 'admin', 'usuario_premium'],['consultar_ejemplar']),
   obtenerEjemplarPorIdValidator, 
   validarErrores, 
   ejemplaresController.obtenerUno
@@ -36,20 +39,23 @@ router.get(
 
 router.get(
   '/ejemplares/codigo/:codigo_barra',
+  checkRolYPermisos('admin', ['consultar_ejemplar']),
   obtenerEjemplarPorCodigoBarraValidator, 
   validarErrores, 
   ejemplaresController.obtenerPorCodigoBarra
 );
 
 router.put(
-  '/id/:id', 
+  '/actualizar/:id', 
+  checkRolYPermisos('admin',['gestionar_ejemplar']),
   actualizarEjemplarValidator, 
   validarErrores, 
   ejemplaresController.actualizar
 );
 
 router.put(
-  '/codigo/:codigo_barra', 
+  '/codigo/:codigo_barra',
+  checkRolYPermisos('admin',['gestionar_ejemplar']), 
   actualizarEjemplarValidator, 
   validarErrores, 
   ejemplaresController.actualizar
@@ -57,6 +63,7 @@ router.put(
 
 router.delete(
   '/:id', 
+  checkRolYPermisos('admin',['gestionar_ejemplar']),
   obtenerEjemplarPorIdValidator, 
   validarErrores, 
   ejemplaresController.eliminar

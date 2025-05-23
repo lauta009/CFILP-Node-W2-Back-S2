@@ -1,37 +1,33 @@
 const categoriaService = require('../services/categoria.service');
+const { NotFoundError, BadRequestError } = require('../utils/appErrors');
 
 const categoriaController = {
-  async crearCategoriaController(req, res) {
-  
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+  async crearCategoriaController(req, res, next) {
+
     const { nombre, categoria_padre_id } = req.body;
     try {
       const nuevaCategoria = await categoriaService.crearCategoria(nombre, categoria_padre_id);
       res.status(201).json(nuevaCategoria);
     } catch (error) {
-      console.error('Error al crear categoría:', error);
-      res.status(500).json({ error: 'No se pudo crear la categoría' });
+      next(error);
     }
   },
 
-  async obtenerCategoriaPorIdController(req, res) {
+  async obtenerCategoriaPorIdController(req, res, next) {
 
     const { id } = req.params;
     try {
       const categoria = await categoriaService.obtenerCategoriaPorId(id);
       if (!categoria) {
-        return res.status(404).json({ error: 'Categoría no encontrada' });
+        return next(new NotFoundError(`Categoría con ID ${id} no encontrada.`));
       }
       res.status(200).json(categoria);
     } catch (error) {
-      console.error('Error al obtener categoría:', error);
-      res.status(500).json({ error: 'No se pudo obtener la categoría' });
+      next(error);
     }
   },
 
-  async actualizarCategoriaController(req, res) {
+  async actualizarCategoriaController(req, res, next) {
 
     const { id } = req.params;
     const { nombre, categoria_padre_id } = req.body;
@@ -39,50 +35,45 @@ const categoriaController = {
       const categoriaActualizada = await categoriaService.actualizarCategoria(id, nombre, categoria_padre_id);
       res.status(200).json(categoriaActualizada);
     } catch (error) {
-      console.error('Error al actualizar categoría:', error);
-      res.status(404).json({ error: error.message });
+      next(error);
     }
   },
 
-  async eliminarCategoriaController(req, res) {
+  async eliminarCategoriaController(req, res, next) {
 
     const { id } = req.params;
     try {
       const resultado = await categoriaService.eliminarCategoria(id);
       res.status(200).json(resultado);
     } catch (error) {
-      console.error('Error al eliminar categoría:', error);
-      res.status(404).json({ error: error.message });
+      next(error);
     }
   },
 
-  async obtenerCategoriasArbolController(req, res) {
+  async obtenerCategoriasArbolController(req, res, next) {
     try {
       const categoriasArbol = await categoriaService.obtenerCategoriasArbol();
       res.status(200).json(categoriasArbol);
     } catch (error) {
-      console.error('Error al obtener categorías en árbol:', error);
-      res.status(500).json({ error: 'No se pudieron obtener las categorías' });
+      next(error);
     }
   },
 
-  async obtenerCategoriasArbolConLibrosController(req, res) {
+  async obtenerCategoriasArbolConLibrosController(req, res, next) {
     try {
       const categoriasArbolConLibros = await categoriaService.obtenerCategoriasArbolConLibros();
       res.status(200).json(categoriasArbolConLibros);
     } catch (error) {
-      console.error('Error al obtener categorías en árbol con libros:', error);
-      res.status(500).json({ error: 'No se pudieron obtener las categorías con libros' });
+      next(error);
     }
   },
 
-  async obtenerTodasLasCategoriasController(req, res) {
+  async obtenerTodasLasCategoriasController(req, res, next) {
     try {
       const todasLasCategorias = await categoriaService.obtenerTodasLasCategorias();
       res.status(200).json(todasLasCategorias);
     } catch (error) {
-      console.error('Error al obtener todas las categorías:', error);
-      res.status(500).json({ error: 'No se pudieron obtener las categorías' });
+      next(error);
     }
   },
 };

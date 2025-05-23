@@ -530,7 +530,7 @@ paths:
           required: true
           schema:
             type: string
-          description: Estado del ejemplar (ej. "disponible", "prestado", "perdido")
+          description: Estado del ejemplar (Ej disponible, prestado, reparacion, baja)
           example: disponible
       responses:
         '200':
@@ -560,6 +560,457 @@ paths:
       responses:
         "200":
           description: Lista de usuarios
+  /users/{id}:
+    get:
+      summary: Obtener usuario por ID
+      tags: [Usuarios]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del usuario
+      responses:
+        '200':
+          description: Usuario obtenido correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Usuario'
+        '403':
+          description: No autorizado
+        '404':
+          description: Usuario no encontrado
+  /users/actualizar/{id}:
+    put:
+      summary: Actualizar un usuario por ID
+      tags: 
+        - Usuarios
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del usuario a actualizar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsuarioUpdate'
+      responses:
+        '200':
+          description: Usuario actualizado correctamente
+        '400':
+          description: Datos inválidos
+        '403':
+          description: No autorizado
+        '404':
+          description: Usuario no encontrado
+  /alquileres:
+    get:
+      tags:
+        - Alquileres
+      summary: Obtener todos los alquileres
+      responses:
+        '200':
+          description: Lista de alquileres obtenida correctamente
+        '500':
+          description: Error al obtener los alquileres
+
+  /alquileres/obtener-uno/{id}:
+    get:
+      tags:
+        - Alquileres
+      summary: Obtener un alquiler por ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID del alquiler a buscar
+      responses:
+        '200':
+          description: Alquiler encontrado
+        '404':
+          description: Alquiler no encontrado
+        '500':
+          description: Error al obtener el alquiler
+
+  /alquileres/activos:
+    get:
+      tags:
+        - Alquileres
+      summary: Obtener alquileres activos
+      responses:
+        '200':
+          description: Lista de alquileres activos
+        '500':
+          description: Error al obtener los alquileres activos
+
+  /alquileres/vencidos:
+    get:
+      tags:
+        - Alquileres
+      summary: Obtener alquileres activos vencidos
+      responses:
+        '200':
+          description: Lista de alquileres vencidos
+        '500':
+          description: Error al obtener los alquileres vencidos
+
+  /alquileres/regular:
+    post:
+      tags:
+        - Alquileres
+      summary: Crear un alquiler regular
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ejemplar_id
+              properties:
+                ejemplar_id:
+                  type: integer
+                  example: 123
+      responses:
+        '201':
+          description: Alquiler regular creado
+        '400':
+          description: Error al crear el alquiler
+
+  /alquiler/premium:
+    post:
+      tags:
+        - Alquileres
+      summary: Crear un alquiler premium
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ejemplar_id
+              properties:
+                ejemplar_id:
+                  type: integer
+                  example: 456
+      responses:
+        '201':
+          description: Alquiler premium creado
+        '400':
+          description: Error al crear el alquiler premium
+
+  /alquiler/devolucion:
+    post:
+      tags:
+        - Alquileres
+      summary: Devolver un ejemplar alquilado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - usuario_id
+                - ejemplar_id
+              properties:
+                usuario_id:
+                  type: integer
+                  example: 10
+                ejemplar_id:
+                  type: integer
+                  example: 123
+      responses:
+        '200':
+          description: Ejemplar devuelto correctamente
+        '400':
+          description: Error al devolver el ejemplar
+  paths:
+  /categorias:
+    get:
+      summary: Obtener todas las categorías
+      tags: [Categorías]
+      responses:
+        '200':
+          description: Lista de categorías
+        '500':
+          description: Error del servidor
+
+    post:
+      summary: Crear una nueva categoría
+      tags: [Categorías]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nombre]
+              properties:
+                nombre:
+                  type: string
+                categoria_padre_id:
+                  type: integer
+      responses:
+        '201':
+          description: Categoría creada correctamente
+        '400':
+          description: Error de validación
+        '403':
+          description: No autorizado
+
+  /categorias/arbol:
+    get:
+      summary: Obtener árbol de categorías
+      tags: [Categorías]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Árbol de categorías
+        '403':
+          description: No autorizado
+        '500':
+          description: Error del servidor
+
+  /categorias/arbol-con-libros:
+    get:
+      summary: Obtener árbol de categorías con libros
+      tags: [Categorías]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Árbol de categorías con libros
+        '403':
+          description: No autorizado
+        '500':
+          description: Error del servidor
+
+  /categorias/obtener-una/{id}:
+    get:
+      summary: Obtener una categoría por ID
+      tags: [Categorías]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Categoría encontrada
+        '404':
+          description: Categoría no encontrada
+        '400':
+          description: Error de validación
+
+  /categorias/{id}:
+    put:
+      summary: Actualizar una categoría por ID
+      tags: [Categorías]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nombre:
+                  type: string
+                categoria_padre_id:
+                  type: integer
+      responses:
+        '200':
+          description: Categoría actualizada
+        '400':
+          description: Error de validación
+        '404':
+          description: Categoría no encontrada
+
+    delete:
+      summary: Eliminar una categoría por ID
+      tags: [Categorías]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Categoría eliminada
+        '404':
+          description: Categoría no encontrada
 
 
-  
+  paths:
+  /ejemplares:
+    get:
+      summary: Obtener todos los ejemplares
+      tags: [Ejemplares]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de ejemplares
+        '403':
+          description: No autorizado
+        '400':
+          description: Error de validación
+
+    post:
+      summary: Crear un nuevo ejemplar
+      tags: [Ejemplares]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ejemplar'
+      responses:
+        '201':
+          description: Ejemplar creado exitosamente
+        '400':
+          description: Error de validación
+        '403':
+          description: No autorizado
+
+  /ejemplares/{id}:
+    get:
+      summary: Obtener un ejemplar por ID
+      tags: [Ejemplares]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ejemplar encontrado
+        '404':
+          description: Ejemplar no encontrado
+        '400':
+          description: Error de validación
+
+    delete:
+      summary: Eliminar un ejemplar por ID
+      tags: [Ejemplares]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ejemplar eliminado
+        '404':
+          description: Ejemplar no encontrado
+        '403':
+          description: No autorizado
+
+  /ejemplares/actualizar/{id}:
+    put:
+      summary: Actualizar ejemplar por ID
+      tags: [Ejemplares]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ejemplar'
+      responses:
+        '200':
+          description: Ejemplar actualizado
+        '404':
+          description: Ejemplar no encontrado
+        '403':
+          description: No autorizado
+
+  /ejemplares/codigo/{codigo_barra}:
+    get:
+      summary: Obtener ejemplar por código de barra
+      tags: [Ejemplares]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: codigo_barra
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ejemplar encontrado
+        '404':
+          description: Ejemplar no encontrado
+        '400':
+          description: Código inválido
+        '403':
+          description: No autorizado
+
+    put:
+      summary: Actualizar ejemplar por código de barra
+      tags: [Ejemplares]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: codigo_barra
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Ejemplar'
+      responses:
+        '200':
+          description: Ejemplar actualizado
+        '404':
+          description: Ejemplar no encontrado
+        '403':
+          description: No autorizado
