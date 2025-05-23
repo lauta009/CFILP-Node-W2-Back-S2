@@ -75,7 +75,6 @@ async function consultarPerfil(token) {
     const response = await axios.get(`${API_BASE_URL}/mi-perfil`, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    console.log('Información del perfil:', response.data);
     return response.data;
   } catch (error) {
     console.error('Error al consultar el perfil:', error.response ? error.response.data : error.message);
@@ -131,18 +130,19 @@ async function main() {
     console.log('\n✅ Usuario regular autenticado. Token obtenido.');
 
     try {
-      console.log('\n--- Paso 3: Listar libros ---');
-      await listarLibros();
 
-      await delay(PAUSE_DURATION); // Pausa
-
-      console.log('\n--- Paso 4: Consultar perfil ---');
+      console.log('\n--- Paso 3: Consultar perfil ---');
       const perfil = await consultarPerfil(tokenRegular);
       if (perfil) {
         console.log('Perfil consultado exitosamente:', perfil);
       } else {
         console.warn('No se pudo consultar el perfil.');
       }
+      await delay(PAUSE_DURATION); // Pausa
+
+      console.log('\n--- Paso 4: Listar libros ---');
+      await listarLibros();
+
       await delay(PAUSE_DURATION); // Pausa
 
       console.log('\n--- Paso 5: Solicitar alquiler ---');
