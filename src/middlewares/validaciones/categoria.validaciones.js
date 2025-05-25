@@ -3,7 +3,10 @@ const { body, param } = require('express-validator');
 const crearCategoriaValidaciones = [
   body('nombre')
     .notEmpty()
-    .withMessage('El nombre de la categoría es requerido'),
+    .trim()
+    .isLength({ max: 150 }).withMessage('La categoría o subcategría no puede tener más de 150 caracteres')
+    .withMessage('El nombre de la categoría es requerido')
+    .escape(),
   body('categoria_padre_id')
     .optional()
     .isInt()
@@ -22,8 +25,10 @@ const actualizarCategoriaValidaciones = [
     .withMessage('El ID de la categoría debe ser un entero mayor o igual a 1'),
   body('nombre')
     .optional()
-    .notEmpty()
-    .withMessage('El nombre de la categoría no puede estar vacío'),
+    .trim()
+    .isLength({ max: 150 }).withMessage('La categoría o subcategría no puede tener más de 150 caracteres')
+    .withMessage('El nombre de la categoría es requerido')
+    .escape(),
   body('categoria_padre_id')
     .optional()
     .isInt()
