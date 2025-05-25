@@ -17,14 +17,6 @@ module.exports = (sequelize) => {
       type: DataTypes.INTEGER,
       primaryKey: true
     },
-    created_at: {
-      type: DataTypes.DATE,
-      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
-    }
   }, {
     sequelize,
     modelName: 'RolPermiso',

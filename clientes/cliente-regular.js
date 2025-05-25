@@ -10,9 +10,10 @@ function delay(ms) {
 async function registrarUsuario(userData) {
   try {
     const response = await axios.post(`${API_BASE_URL}/auth/register`, userData);
+    console.log(response.data);
     return response.data;
   } catch (error) {
-    console.error('Error al registrar usuario:', error.response ? error.response.data : error.message);
+    console.error('❌ Error al registrar usuario:', error.response ? error.response.data : error.message);
     throw error;
   }
 }
@@ -22,42 +23,65 @@ async function iniciarSesion(credentials) {
     const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
     return response.data.token;
   } catch (error) {
-    console.error('Error al iniciar sesión:', error.response ? error.response.data : error.message);
+    console.error('❌ Error al iniciar sesión:', error.response ? error.response.data : error.message);
     throw error;
   }
 }
 
-async function listarLibros(limit, page, filtro, detalle = basico) {
-  try {    
-    const response = await axios.get(`${API_BASE_URL}/libros/?limit=${limit}&page=${page}&${filtro}&detalle=${detalle}`); 
-    console.log('Lista de libros:', response.data);
-    return response.data; // Retorna la lista de libros
+async function listarLibros(limit, page, filtro, detalle = 'basico') {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/libros/?limit=${limit}&page=${page}&${filtro}&detalle=${detalle}`);
+    console.log('📚 Lista de libros de esta biblioteca:');
+    console.table(response.data.libros.map(libro => ({
+      ID: libro.id,
+      Título: libro.titulo,
+      ISBN: libro.isbn,
+      Categoría: libro.categoria,
+      EsPremium: libro.es_premium
+    })));
+    return response.data;
   } catch (error) {
-    console.error('Error al listar libros:', error.response ? error.response.data : error.message);
+    console.error('❌ Error al listar libros:', error.response ? error.response.data : error.message);
   }
 }
 
 async function buscarLibroPorSaga(saga) {
   try {
     const response = await axios.get(`${API_BASE_URL}/libros/buscar/?saga=${saga}`);
-    return response.data; // Retorna el o los libros encontrados
+    console.log(`🔍 Resultados para la saga "${saga}":`);
+    console.table(response.data.map(libro => ({
+      Título: libro.titulo,
+      ISBN: libro.isbn,
+      Saga: libro.saga_coleccion,
+      Premium: libro.es_premium,
+      Autores: libro.autores.map(a => `${a.nombre} ${a.apellido}`).join(', ')
+    })));
+    return response.data;
   } catch (error) {
-    console.error('Error al buscar libro por saga:', error.response ? error.response.data : error.message);
+    console.error('❌ Error al buscar libro por saga:', error.response ? error.response.data : error.message);
   }
 }
 
 async function solicitarAlquilerRegular(token, ejemplarId) {
   try {
-    const response = await axios.post(`${API_BASE_URL}/alquileres/regular`, 
-      { ejemplar_id: ejemplarId }, 
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
+    const response = await axios.post(`${API_BASE_URL}/alquileres/regular`,
+      { ejemplar_id: ejemplarId },
+      { headers: { Authorization: `Bearer ${token}` } }
     );
-    return response.data; // Retorna los datos del alquiler
+    console.log('✅ Alquiler realizado correctamente:');
+    console.table({
+      'Librio': response.data.ejemplar.libro.titulo,
+      'Ejemplar Codigo': response.data.ejemplar.codigo_barra,
+      'Usuario': response.data.usuario.email,
+      'Fecha alquiler': response.data.fecha_alquiler,
+      'Fecha vencimiento': response.data.fecha_vencimiento,
+      'Fecha devolución': response.data.fecha_devolucion,
+      'Estado' : response.data.estado
+    });
+    return response.data;
   } catch (error) {
-    console.error('Error al solicitar alquiler regular:', error.response ? error.response.data : error.message);
-    throw error; 
+    console.error('❌ Error al solicitar alquiler:', error.response ? error.response.data : error.message);
+    throw error;
   }
 }
 
@@ -65,14 +89,13 @@ async function devolverLibro(token, ejemplarId) {
   try {
     const response = await axios.post(`${API_BASE_URL}/alquileres/devolucion`,
       { ejemplar_id: ejemplarId },
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
+      { headers: { Authorization: `Bearer ${token}` } }
     );
-    console.log(`Devolución procesada para ejemplar ${ejemplarId}:`, response.data);
-    return response.data; 
+    console.log(`📦 Devolución procesada correctamente para el ejemplar ${ejemplarId}`);
+    console.table(response.data);
+    return response.data;
   } catch (error) {
-    console.error('Error al devolver libro:', error.response ? error.response.data : error.message);
+    console.error('❌ Error al devolver libro:', error.response ? error.response.data : error.message);
     throw error;
   }
 }
@@ -82,9 +105,24 @@ async function consultarPerfil(token) {
     const response = await axios.get(`${API_BASE_URL}/mi-perfil`, {
       headers: { Authorization: `Bearer ${token}` }
     });
+    console.log('📄 Perfil del usuario:');
+    console.log(`
+      🆔 ID:              ${response.data.id}
+      👤 Nombre:          ${response.data.nombre} ${response.data.apellido}
+      📧 Email:           ${response.data.email}
+      🔐 Rol:             ${response.data.rol?.nombre}
+      📞 Teléfono:        ${response.data.telefono ?? 'No disponible'}
+      🪪 Documento:       ${response.data.nro_doc}
+      🏠 Dirección:       ${response.data.direccion ?? 'No disponible'}
+      📍 Localidad:       ${response.data.localidad ?? 'No disponible'}
+      🏷️ Código Postal:   ${response.data.cod_postal ?? 'No disponible'}
+      🕒 Último Login:    ${response.data.ultimo_login}
+      📅 Creado el:       ${response.data.createdAt}
+      ♻️ Actualizado el:  ${response.data.updatedAt}
+      ✅ Estado:          ${response.data.estado ? 'Activo' : 'Inactivo'}`);
     return response.data;
   } catch (error) {
-    console.error('Error al consultar el perfil:', error.response ? error.response.data : error.message);
+    console.error('❌ Error al consultar el perfil:', error.response ? error.response.data : error.message);
     throw error;
   }
 }
@@ -99,116 +137,86 @@ async function main() {
   };
 
   let tokenRegular;
-  let ejemplarParaAqluilarId = 4; // ID de un ejemplar no premium
-  let PAUSE_DURATION = 10000; 
+  let ejemplarParaAqluilarId = 4;
+  let PAUSE_DURATION = 10000;
 
-  console.log('--- Iniciando simulación de cliente regular ---');
+  console.log('🚀 --- Iniciando simulación de cliente REGULAR ---');
+  await delay(PAUSE_DURATION / 4);
 
-  await delay(PAUSE_DURATION/4); 
-
-  console.log('Usuario regular:', registroData);
+  console.log('📄 Datos del usuario:');
+  console.table([registroData]);
 
   try {
-    console.log('\n--- Paso 1: Registrar usuario (si no existe) ---');
-
-    // Intentar registrar. Si ya existe, capturamos el error pero continuamos con el login.
-    await delay(PAUSE_DURATION / 4); // Pausa 
+    console.log('\n🛠️ --- Paso 1: Registrar usuario ---');
+    await delay(PAUSE_DURATION / 4);
 
     try {
       await registrarUsuario(registroData);
-      console.log('Usuario registrado exitosamente.');
+      console.log('✅ Usuario registrado exitosamente.');
     } catch (error) {
-      if (error.response && error.response.status === 409) {// 409 Conflict 
-        console.warn('Usuario ya registrado, continuando con el inicio de sesión.');
+      if (error.response && error.response.status === 409) {
+        console.warn('⚠️ Usuario ya registrado. Continuando con login...');
       } else {
-        console.error('Error inesperado durante el registro. Deteniendo.', error);
+        console.error('❌ Error inesperado. Abortando simulación.');
         return;
       }
     }
 
-    await delay(PAUSE_DURATION); // Pausa de 10 segundos
+    await delay(PAUSE_DURATION);
 
-    console.log('\n--- Paso 2: Iniciar sesión ---');
-    tokenRegular = await iniciarSesion({ email: registroData.email, password: registroData.password });;
-
-    await delay(PAUSE_DURATION/3); // Pausa 
+    console.log('\n🔐 --- Paso 2: Iniciar sesión ---');
+    tokenRegular = await iniciarSesion({ email: registroData.email, password: registroData.password });
+    await delay(PAUSE_DURATION / 3);
 
   } catch (authError) {
-    console.error('\n🚫 Simulación fallida en registro/inicio de sesión:', authError.message);
-    return; // Detener la ejecución si el auth falla
+    console.error('🚫 Error de autenticación:', authError.message);
+    return;
   }
 
   if (tokenRegular) {
-    console.log('\n✅ Usuario regular autenticado. Token obtenido.');
-    console.log('Token:', tokenRegular);
-    await delay(PAUSE_DURATION/3); 
+    console.log('\n🔑 Token obtenido. Usuario autenticado.');
+    console.log(tokenRegular);
+    await delay(PAUSE_DURATION / 3);
 
     try {
-      console.log('\n--- Paso 3: Consultar perfil ---');
-      const perfil = await consultarPerfil(tokenRegular);
-      if (perfil) {
-        console.log('Perfil consultado exitosamente:', perfil);
-      } else {
-        console.warn('No se pudo consultar el perfil.');
-      }
-      await delay(PAUSE_DURATION); // Pausa
+      console.log('\n👁️ --- Paso 3: Usuario regular consulta los datos de su perfil ---');
+      await consultarPerfil(tokenRegular);
+      await delay(PAUSE_DURATION);
 
-      console.log('\n--- Paso 4: Listar libros ---');
-      console.log('El usuario consulta los primeros 3 libros de la categoría: Ficción');
+      console.log('\n📚 --- Paso 4: Listar libros ---');
+      console.log('🧾 Mostrando los primeros 7 libros de la categoría: Ficción, ordenados alfabeticamente');
+      await delay(PAUSE_DURATION / 3);
+      await listarLibros(7, 1, 'categoria=ficcion');
+      await delay(PAUSE_DURATION);
 
-      await delay(PAUSE_DURATION/3); // Pausa
+      console.log('\n🔎 --- Paso 4.1: Buscar por saga ---');
+      const saga = 'Señor de los Anillos';
+      console.log(`🔎 Buscando libros de la saga "${saga}"`);
+      await delay(PAUSE_DURATION / 3);
+      await buscarLibroPorSaga(saga);
+      await delay(PAUSE_DURATION / 3);
 
-      await listarLibros(3, 1, 'categoria=ficcion', 'basico'); // Listar libros
+      console.log('\n📦 --- Paso 5: Solicitar alquiler ---');
+      console.log(`📘 Solicitando alquiler del ejemplar ID=${ejemplarParaAqluilarId} (no premium)`);
+      const alquiler = await solicitarAlquilerRegular(tokenRegular, ejemplarParaAqluilarId);
+      await delay(PAUSE_DURATION);
 
-      await delay(PAUSE_DURATION); // Pausa
-
-      console.log('\n--- Paso 4.1: Busqueda de un libro  ---');
-      console.log('El usuario busca un libro por saga: "Señor de los Anillos"');
-      await delay(PAUSE_DURATION/3); // Pausa
-      const sagaBuscada = 'Señor de los Anillos';
-      const librosEncontrados = await buscarLibroPorSaga(sagaBuscada);  
-      if (librosEncontrados && librosEncontrados.length > 0) {
-        console.log(`Libros encontrados para la saga "${sagaBuscada}":`, librosEncontrados);
-      }else{
-        console.warn('No se pudieron encontra libros por esa saga');
-      }
-
-      await delay(PAUSE_DURATION/3);
-
-      console.log('\n--- Paso 5: Solicitar alquiler ---');
-
-      console.log('\nEl usuario solicita el alquiler del ejemplar con id=4 perteneciente al libro titulado Moscú 2042, el cual no es premium');
-
-
-      const alquiler2 = await solicitarAlquilerRegular(tokenRegular, ejemplarParaAqluilarId);
-      if (alquiler2) {
-        console.log('Alquiler exitoso:', alquiler2);
-      } else {
-        console.warn('El alquiler no fue exitoso.');
-      }
-
-      await delay(PAUSE_DURATION); // Pausa
-
-      // Solo intentar devolver si el alquiler fue exitoso
-      if (alquiler2) {
-        console.log('\n--- Paso 6: Devolver libro ---');
+      if (alquiler) {
+        console.log('\n♻️ --- Paso 6: Devolver libro ---');
         await devolverLibro(tokenRegular, ejemplarParaAqluilarId);
-        console.log('Devolución exitosa del ejemplar.');
-
-        await delay(PAUSE_DURATION); // Pausa
-        
+        await delay(PAUSE_DURATION);
       } else {
-        console.warn('\nAdvertencia: El alquiler no fue exitoso, no se intentará la devolución.');
+        console.warn('⚠️ No se pudo realizar el alquiler, no se intentará la devolución.');
       }
 
     } catch (operationError) {
-      console.error('\n🚫 Simulación fallida durante las operaciones de la biblioteca:', operationError.message);
+      console.error('❌ Error durante las operaciones:', operationError.message);
     }
   } else {
-    console.error('\n🚫 No se pudo obtener el token, las operaciones no se realizarán.');
+    console.error('🚫 Token no obtenido. Abortando simulación.');
   }
 
-  console.log('\n--- Simulación de cliente regular finalizada ---');
+  console.log('\n🏁 --- Simulación finalizada ---');
 }
 
 main();

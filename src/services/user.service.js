@@ -1,4 +1,4 @@
-const { Usuario, Rol } = require('../models');
+const { Usuario, Rol, Permiso } = require('../models');
 const { NotFoundError } = require('../utils/appErrors');
 
 const getAllUsuarios = async () => {
@@ -7,6 +7,12 @@ const getAllUsuarios = async () => {
       {
         model: Rol,
         as: 'rol',
+        include: [
+          {
+            model: Permiso,
+            as: 'permisos'
+          }
+        ]
       },
     ],
   });
@@ -18,6 +24,12 @@ const getUsuarioById = async (id) => {
       {
         model: Rol,
         as: 'rol',
+        include: [
+          {
+            model: Permiso,
+            as: 'permisos'
+          }
+        ]
       },
     ],
   });

@@ -40,7 +40,7 @@ router.get(
 );
 
 router.get(
-  '/ejemplares/codigo/:codigo_barra',
+  '/codigo/:codigo_barra',
   authMiddleware,
   checkRolYPermisos('admin', ['consultar_ejemplar']),
   obtenerEjemplarPorCodigoBarraValidator, 
@@ -50,8 +50,8 @@ router.get(
 
 router.get(
   '/disponibles-por-libro', 
-  //authMiddleware,
-  //checkRolYPermisos(['admin', 'regular', 'premium'], ['consultar_ejemplar']), 
+  authMiddleware,
+  checkRolYPermisos(['admin', 'regular', 'premium'], ['consultar_ejemplar']), 
   ejemplaresController.obtenerEjemplaresDisponiblesDeLibro
 );
 

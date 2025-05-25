@@ -3,7 +3,7 @@ const { BadRequestError } = require('../utils/appErrors');
 
 async function validarISBNconOpenLibrary(isbn) {
   try {
-    const res = await axios.get(`https://openlibrary.org/isbn/${isbn}.json`);
+    await axios.get(`https://openlibrary.org/isbn/${isbn}.json`);
     return true;
   } catch (error) {
     if (error.response && error.response.status === 404) {

@@ -18,10 +18,9 @@ module.exports = (sequelize) => {
 
   Rol.init({
     nombre: DataTypes.STRING,
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE
   }, {
     sequelize,
+    timestamps: true,
     modelName: 'Rol',
     tableName: 'roles',
     underscored: true

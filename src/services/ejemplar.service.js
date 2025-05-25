@@ -124,8 +124,7 @@ async function actualizarEjemplar(id, datos) {
       }]
     });
   }
-  // Si no se encontró el ejemplar para actualizar
-  throw new NotFoundError('Ejemplar no encontrado para actualizar');
+  if(!filasActualizadas || filasActualizadas == 0) throw new NotFoundError('Ejemplar no encontrado para actualizar');
 }
 
 async function eliminarEjemplar(id) {

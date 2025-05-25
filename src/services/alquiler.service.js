@@ -1,7 +1,7 @@
 const { Alquiler, Ejemplar, Usuario, Libro } = require('../models');
 const { differenceInDays } = require('date-fns');
 const { Op } = require('sequelize');
-const { NotFoundError, BadRequestError, UnauthorizedError } = require('../utils/appErrors');
+const { NotFoundError, BadRequestError, UnauthorizedError, ConflictError } = require('../utils/appErrors');
 
 // Cambiar estos valores según el tipo de usuario y lógica de negocio, por defecto son los valores para usuarios regulares
 let limiteAlquileresSimultaneos = 3;
@@ -9,8 +9,8 @@ let limiteDiasDeAlquiler = 30;
 
 async function _verificarUsuarioActivo(usuarioId) {
   const usuario = await Usuario.findByPk(usuarioId);
-  if (!usuario || !usuario.estado) {
-    return next(new BadRequestError(`El usuario con ID ${usuarioId} no puede alquilar ya que se encuentra sancionado o no existe.`));
+  if (!usuario?.estado) {
+    throw new BadRequestError(`El usuario con ID ${usuarioId} no puede alquilar ya que se encuentra sancionado o no existe.`);
   }
   return usuario;
 }
@@ -24,10 +24,10 @@ async function _verificarEjemplarDisponible(ejemplarId) {
     }
   ] });
   if (!ejemplar) {
-    return next(new NotFoundError(`El ejemplar con ID ${ejemplarId} no existe.`));
+    throw new NotFoundError(`El ejemplar con ID ${ejemplarId} no existe.`);
   }
   if (ejemplar.estado !== 'disponible') {
-    return next(new BadRequestError(`El ejemplar con ID ${ejemplarId} no está disponible para alquiler.`));
+    throw new BadRequestError(`El ejemplar con ID ${ejemplarId} no está disponible para alquiler.`);
   }
   return ejemplar;
 }
@@ -35,25 +35,25 @@ async function _verificarEjemplarDisponible(ejemplarId) {
 async function _verificarLimiteAlquileres(usuarioId, limite) {
   const alquileresActivos = await Alquiler.count({ where: { usuario_id: usuarioId, fecha_devolucion: null } });
   if (alquileresActivos >= limite) {
-    return next(new BadRequestError(`El usuario ha alcanzado el límite de ${limite} alquileres simultáneos (${limite}).`));
+    throw new BadRequestError(`El usuario ha alcanzado el límite de ${limite} alquileres simultáneos (${limite}).`);
   }
 }
 
 async function _crearNuevoAlquiler(usuarioId, ejemplarId, fechaVencimiento) {
-  // Verificar si ya existe un alquiler activo para este usuario y ejemplar
   const alquilerActivo = await Alquiler.findOne({
     where: {
       usuario_id: usuarioId,
       ejemplar_id: ejemplarId,
-      fecha_devolucion: { [Op.eq]: null } // Que no se haya devuelto aún
-    }
+      fecha_devolucion: { [Op.eq]: null }
+    },
   });
 
   if (alquilerActivo) {
-    throw next(new ConflictError('Este usuario ya tiene un alquiler activo para este ejemplar.'));
+    throw new ConflictError('Este usuario ya tiene un alquiler activo para este ejemplar.');
   }
 
   const now = new Date();
+
   const nuevoAlquiler = await Alquiler.create({
     usuario_id: usuarioId,
     ejemplar_id: ejemplarId,
@@ -63,29 +63,55 @@ async function _crearNuevoAlquiler(usuarioId, ejemplarId, fechaVencimiento) {
   });
 
   if (!nuevoAlquiler) {
-    return next(new BadRequestError('No se pudo crear el alquiler.'));
+    throw new BadRequestError('No se pudo crear el alquiler.');
   }
-  // Actualizar el estado del ejemplar a 'prestado'
+
   await Ejemplar.update({ estado: 'prestado' }, { where: { id: ejemplarId } });
 
-  return nuevoAlquiler;
+  // 🔄 Sumar los datos adicionales: email del usuario y título del libro
+  const alquilerConDatos = await Alquiler.findOne({
+    where: {
+      usuario_id: usuarioId,
+      ejemplar_id: ejemplarId,
+      fecha_devolucion: null
+    },
+    include: [
+      {
+        model: Ejemplar,
+        as: 'ejemplar',
+        attributes: ['id', 'codigo_barra'],
+        include: [{
+          model: Libro,
+          as: 'libro',
+          attributes: ['titulo']
+        }]
+      },
+      {
+        model: Usuario,
+        as: 'usuario',
+        attributes: ['id', 'nombre', 'email']
+      }
+    ]
+  });
+
+  return alquilerConDatos;
 }
 
 async function alquilarLibroRegular(usuarioId, ejemplarId) {
   const usuario = await _verificarUsuarioActivo(usuarioId);
 
-  if (!usuario.rol_id === 2) {
-    return next(new BadRequestError('El usuario no es regular.'));
+  if (usuario.rol_id !== 2) {
+    throw new BadRequestError('El usuario no es regular.');
   } 
 
   const ejemplar = await _verificarEjemplarDisponible(ejemplarId);
 
   if (!ejemplar) {
-    return next(new NotFoundError(`El ejemplar con ID ${ejemplarId} no existe.`));
+    throw new NotFoundError(`El ejemplar con ID ${ejemplarId} no existe.`);
   }
 
   if (ejemplar.libro.es_premium) {
-    return next(new UnauthorizedError('El ejemplar es premium y no puede ser alquilado por un usuario regular.'));
+    throw new UnauthorizedError('El ejemplar es premium y no puede ser alquilado por un usuario regular.');
   }
 
   const fechaVencimiento = new Date(new Date().getTime() + (limiteDiasDeAlquiler * 24 * 60 * 60 * 1000)); 
@@ -94,17 +120,16 @@ async function alquilarLibroRegular(usuarioId, ejemplarId) {
   return _crearNuevoAlquiler(usuario.id, ejemplar.id, fechaVencimiento);
 }
 
-
 async function alquilarLibroPremium(usuarioId, ejemplarId) {
   const usuario = await _verificarUsuarioActivo(usuarioId);
 
-  if  (!usuario.rol_id === 1) {
+  if (usuario.rol_id !== 1) {
     return next(new BadRequestError('El usuario no es premium.'));
   }
   const ejemplar = await _verificarEjemplarDisponible(ejemplarId);
 
   if (!ejemplar.libro.es_premium) {
-    return next(new BadRequestError('El ejemplar no es premium y no puede ser alquilado por un usuario premium.'));   
+    throw new BadRequestError('El ejemplar no es premium y no puede ser alquilado por un usuario premium.');   
   }
 
   limiteAlquileresSimultaneos = 6; //Límite de ejemplares alquilados al mismo tiempo para usuarios premium
@@ -115,7 +140,6 @@ async function alquilarLibroPremium(usuarioId, ejemplarId) {
   await _verificarLimiteAlquileres(usuario.id, limiteAlquileresSimultaneos); 
   return _crearNuevoAlquiler(usuario.id, ejemplar.id, fechaVencimiento);
 }
-
 
 async function devolverEjemplar(usuarioId, ejemplarId) {
   // 1. Verificar si existe un alquiler activo para este usuario y ejemplar
@@ -132,7 +156,7 @@ async function devolverEjemplar(usuarioId, ejemplarId) {
   });
 
   if (!alquilerActivo) {
-    return next(new NotFoundError(`No se encontró un alquiler activo para el ejemplar con ID ${ejemplarId} y el usuario con ID ${usuarioId}.`));
+    throw new NotFoundError(`No se encontró un alquiler activo para el ejemplar con ID ${ejemplarId} y el usuario con ID ${usuarioId}.`);
   }
 
   // 2. Registrar la fecha de devolución
@@ -156,7 +180,7 @@ async function devolverEjemplar(usuarioId, ejemplarId) {
       await usuario.update({ estado: false });
       return { mensaje: `Ejemplar devuelto con ${diferenciaDias} días de retraso. Usuario con id = ${usuario.id} y nombre ${usuario.nombre} sancionado.` };    
     }else {
-      return next(new NotFoundError(`No se encontró el usuario con ID ${usuarioId}.`));
+      throw new NotFoundError(`No se encontró el usuario con ID ${usuarioId}.`);
     }
   }
 
@@ -237,7 +261,7 @@ async function obtenerAlquileresActivos() {
     ]
   });
   if (!alquileresActivos) {
-    return next(new NotFoundError('No se encontraron alquileres activos.'));
+    throw new NotFoundError('No se encontraron alquileres activos.');
   }
   return alquileresActivos;
 }
@@ -270,7 +294,7 @@ async function obtenerAlquileresActivosVencidos() {
     ]
   });
   if (!alquileresVencidos) {
-    return next(new NotFoundError('No se encontraron alquileres activos vencidos.'));
+    throw new NotFoundError('No se encontraron alquileres activos vencidos.');
   }
   return alquileresVencidos;
 }
