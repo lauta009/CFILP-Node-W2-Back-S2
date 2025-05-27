@@ -11,8 +11,10 @@ const alquilerController = {
     }
     try {
       const alquiler = await alquilerService.alquilarLibroRegular(usuarioId, ejemplar_id);
+
       res.status(201).json(alquiler);
     } catch (error) {
+      console.log('Error al crear el alquiler regular:', error);
       next(error);
     }
   },

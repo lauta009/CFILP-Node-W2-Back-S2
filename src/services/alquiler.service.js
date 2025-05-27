@@ -10,7 +10,7 @@ let limiteDiasDeAlquiler = 30;
 async function _verificarUsuarioActivo(usuarioId) {
   const usuario = await Usuario.findByPk(usuarioId);
   if (!usuario || !usuario.estado) {
-    return next(new BadRequestError(`El usuario con ID ${usuarioId} no puede alquilar ya que se encuentra sancionado o no existe.`));
+    return  new BadRequestError(`El usuario con ID ${usuarioId} no puede alquilar ya que se encuentra sancionado o no existe.`);
   }
   return usuario;
 }
@@ -24,10 +24,10 @@ async function _verificarEjemplarDisponible(ejemplarId) {
     }
   ] });
   if (!ejemplar) {
-    return next(new NotFoundError(`El ejemplar con ID ${ejemplarId} no existe.`));
+    return new NotFoundError(`El ejemplar con ID ${ejemplarId} no existe.`);
   }
   if (ejemplar.estado !== 'disponible') {
-    return next(new BadRequestError(`El ejemplar con ID ${ejemplarId} no está disponible para alquiler.`));
+    return new BadRequestError(`El ejemplar con ID ${ejemplarId} no está disponible para alquiler.`);
   }
   return ejemplar;
 }
@@ -91,7 +91,29 @@ async function alquilarLibroRegular(usuarioId, ejemplarId) {
   const fechaVencimiento = new Date(new Date().getTime() + (limiteDiasDeAlquiler * 24 * 60 * 60 * 1000)); 
   
   await _verificarLimiteAlquileres(usuario.id, limiteAlquileresSimultaneos); 
-  return _crearNuevoAlquiler(usuario.id, ejemplar.id, fechaVencimiento);
+  const nuevoAlquiler =  await _crearNuevoAlquiler(usuario.id, ejemplar.id, fechaVencimiento);
+   return await Alquiler.findByPk(nuevoAlquiler.id, {
+    include: [
+      {
+        model: Ejemplar,
+        as: 'ejemplar',
+        attributes: ['id', 'codigo_barra'],
+        include: [
+          {
+            model: Libro,
+            as: 'libro',
+            attributes: ['titulo']
+          }
+        ]
+      },
+      {
+        model: Usuario,
+        as: 'usuario',
+        attributes: ['id', 'nombre', 'apellido', 'email']
+      }
+    ]
+  });
+  
 }
 
 

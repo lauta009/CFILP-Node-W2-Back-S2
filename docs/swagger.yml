@@ -579,12 +579,26 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Usuario'
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  nombre:
+                    type: string
+                    example: Juan Pérez
+                  email:
+                    type: string
+                    example: juan@example.com
+                  rol:
+                    type: string
+                    example: admin
         '403':
           description: No autorizado
         '404':
           description: Usuario no encontrado
-  /users/actualizar/{id}:
+    
+  /users/{id}:
     put:
       summary: Actualizar un usuario por ID
       tags: 
@@ -613,6 +627,31 @@ paths:
           description: No autorizado
         '404':
           description: Usuario no encontrado
+
+
+  delete:
+    summary: Eliminar o bloquear un usuario por ID
+    tags: 
+      - Usuarios
+    security:
+      - bearerAuth: []
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        description: ID del usuario a eliminar o bloquear
+    responses:
+      '200':
+        description: Usuario eliminado o bloqueado correctamente
+      '400':
+        description: ID inválido
+      '403':
+        description: No autorizado
+      '404':
+        description: Usuario no encontrado
+
   /alquileres:
     get:
       tags:

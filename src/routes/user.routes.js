@@ -9,7 +9,7 @@ const { checkRolYPermisos } = require('../middlewares/auth.middleware');
 router.get('/', checkRolYPermisos('admin', ['consultar_users']), userController.getAll);
 router.get('/:id', checkRolYPermisos('admin', ['consultar_users']), userController.getById);
 router.post('/', checkRolYPermisos(['admin'], ['gestionar_users']), validarRegisterUsuario,validarErrores, userController.create);
-router.put('/actualizar/:id', checkRolYPermisos(['admin'], ['gestionar_users']), validarErrores, userController.update);
+router.put('/:id', checkRolYPermisos(['admin'], ['gestionar_users']), validarErrores, userController.update);
 router.delete('/:id', checkRolYPermisos(['admin'], ['gestionar_users']), userController.remove);
 
 module.exports = router;
