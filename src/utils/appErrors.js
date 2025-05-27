@@ -1,3 +1,5 @@
+// Clase personalizada para centralizar errores
+
 class AppError extends Error {
   constructor(message, statusCode) {
     super(message);

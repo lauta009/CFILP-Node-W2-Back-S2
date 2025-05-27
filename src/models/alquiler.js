@@ -39,8 +39,6 @@ module.exports = (sequelize) => {
     estado: {
       type: DataTypes.ENUM('pendiente', 'devuelto', 'atrasado')
     },
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Alquiler',

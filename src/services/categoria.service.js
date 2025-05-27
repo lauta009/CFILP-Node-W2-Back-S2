@@ -10,7 +10,7 @@ const categoriaService = {
       include: [
         {
           model: Libro,
-          as: 'Libros',
+          as: 'libros',
           attributes: ['id', 'titulo', 'isbn'],
         },
       ],
@@ -20,7 +20,6 @@ const categoriaService = {
     if (subcategorias.length === 0) {
       return []; 
     }
-
 
     return Promise.all(
       subcategorias.map(async (subcategoria) => ({
@@ -33,7 +32,7 @@ const categoriaService = {
   async crearCategoria(nombre, categoria_padre_id) {
     const nuevaCategoria = await Categoria.create({ nombre, categoria_padre_id });
     if (!nuevaCategoria) {
-      return next(new BadRequestError('Error al crear la categoría.'));
+      throw new BadRequestError('Error al crear la categoría.');
     }
     return nuevaCategoria;
   },
@@ -41,7 +40,7 @@ const categoriaService = {
   async obtenerCategoriaPorId(id) {
     const categoria = await Categoria.findByPk(id);
     if (!categoria) {
-      return next(new NotFoundError(`Categoría con ID ${id} no encontrada.`));
+      throw new NotFoundError(`Categoría con ID ${id} no encontrada.`);
     }
     return categoria;
   },
@@ -49,7 +48,7 @@ const categoriaService = {
   async actualizarCategoria(id, nombre, categoria_padre_id) {
     const [filasActualizadas] = await Categoria.update({ nombre, categoria_padre_id }, { where: { id } });
     if (filasActualizadas === 0) {
-      return next(new NotFoundError(`Categoría con ID ${id} no encontrada.`));
+      throw new NotFoundError(`Categoría con ID ${id} no encontrada.`);
     }
     const categoriaActualizada = await Categoria.findByPk(id);
     return categoriaActualizada;
@@ -58,7 +57,7 @@ const categoriaService = {
   async eliminarCategoria(id) {
     const filasEliminadas = await Categoria.destroy({ where: { id } });
     if (filasEliminadas === 0) {
-      return next(new NotFoundError(`Categoría con ID ${id} no encontrada.`));
+      throw new NotFoundError(`Categoría con ID ${id} no encontrada.`);
     }
     return { message: `Categoría con ID ${id} eliminada correctamente` };
   },
@@ -69,11 +68,11 @@ const categoriaService = {
       include: [
         {
           model: Categoria,
-          as: 'hijas',
+          as: 'subcategorias',
           include: [
             {
               model: Categoria,
-              as: 'hijas',
+              as: 'subcategorias',
             },
           ],
         },
@@ -81,7 +80,7 @@ const categoriaService = {
       order: [['nombre', 'ASC']],
     });
     if (!categoriasPadre) {
-      return next(new NotFoundError('No se encontraron categorías.'));
+      throw new NotFoundError('No se encontraron categorías.');
     }
     return categoriasPadre;
   },
@@ -93,7 +92,7 @@ const categoriaService = {
       include: [
         {
           model: Libro,
-          as: 'Libros',
+          as: 'libros',
           attributes: ['id', 'titulo', 'isbn'],
         },
       ],
@@ -101,7 +100,7 @@ const categoriaService = {
     });
 
     if (!categoriasPadre) {
-      return next(new NotFoundError('No se encontraron categorías.'));
+      throw new NotFoundError('No se encontraron categorías.');
     }
 
     return Promise.all(
@@ -115,7 +114,7 @@ const categoriaService = {
   async obtenerTodasLasCategorias() {
     const categorias = await Categoria.findAll({ order: [['nombre', 'ASC']] });
     if (!categorias) {
-      return next(new NotFoundError('No se encontraron categorías.'));
+      throw new NotFoundError('No se encontraron categorías.');
     }
     return categorias;
   },

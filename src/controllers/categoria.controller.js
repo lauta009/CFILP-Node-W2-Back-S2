@@ -1,5 +1,5 @@
 const categoriaService = require('../services/categoria.service');
-const { NotFoundError, BadRequestError } = require('../utils/appErrors');
+const { NotFoundError } = require('../utils/appErrors');
 
 const categoriaController = {
   async crearCategoriaController(req, res, next) {

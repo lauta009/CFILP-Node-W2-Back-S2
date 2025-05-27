@@ -25,12 +25,16 @@ const crearEjemplarValidator = [
   body('codigo_barra')
     .notEmpty().withMessage('El código de barra es obligatorio')
     .isString().withMessage('El código de barra debe ser una cadena de texto')
-    .isLength({ max: 100 }).withMessage('El código de barra no puede tener más de 100 caracteres'),
+    .trim()
+    .isLength({ max: 100 }).withMessage('El código de barra no puede tener más de 100 caracteres')
+    .escape(),
 
   body('estado')
     .notEmpty().withMessage('El estado es obligatorio')
     .isString().withMessage('El estado debe ser una cadena de texto')
-    .custom(esEstadoValido).withMessage('El estado debe ser uno de: disponible, prestado, reparacion, baja'),
+    .trim()
+    .custom(esEstadoValido).withMessage('El estado debe ser uno de: disponible, prestado, reparacion, baja')
+    .escape(),
 ];
 
 //Se permite actualizar un ejemplar por su ID o por su código de barra.
@@ -43,7 +47,9 @@ const actualizarEjemplarValidator = [
   param('codigo_barra')
     .optional()
     .isString().withMessage('El código de barra debe ser una cadena de texto')
-    .isLength({ max: 100 }).withMessage('El código de barra no puede tener más de 100 caracteres'),
+    .trim()
+    .isLength({ max: 100 }).withMessage('El código de barra no puede tener más de 100 caracteres')
+    .escape(),
 
   param(['id', 'codigo_barra'])
     .custom((value, { req }) => {
@@ -61,7 +67,9 @@ const actualizarEjemplarValidator = [
   body('estado')
     .optional()
     .isString().withMessage('El estado debe ser una cadena de texto')
-    .custom(esEstadoValido).withMessage('El estado debe ser uno de: disponible, prestado, reparacion, baja'),
+    .trim()
+    .custom(esEstadoValido).withMessage('El estado debe ser uno de: disponible, prestado, reparacion, baja')
+    .escape(),
 ];
 
 const obtenerEjemplarPorIdValidator = [
@@ -73,7 +81,9 @@ const obtenerEjemplarPorCodigoBarraValidator = [
   param('codigo_barra')
     .notEmpty().withMessage('El código de barra es obligatorio')
     .isString().withMessage('El código de barra debe ser una cadena de texto')
-    .isLength({ max: 100 }).withMessage('El código de barra no puede tener más de 100 caracteres'),
+    .trim()
+    .isLength({ max: 100 }).withMessage('El código de barra no puede tener más de 100 caracteres')
+    .escape(),
 ];
 
 const obtenerTodosLosEjemplaresValidator = [
@@ -93,11 +103,13 @@ const obtenerTodosLosEjemplaresValidator = [
   query('codigo_barra')
     .optional()
     .isString().withMessage('El código de barra debe ser una cadena de texto')
+    .trim()
     .isLength({ max: 100 }).withMessage('El código de barra no puede tener más de 100 caracteres'),
 
   query('estado')
     .optional()
     .isString().withMessage('El estado debe ser una cadena de texto')
+    .trim()
     .custom(esEstadoValido).withMessage('El estado debe ser uno de: disponible, prestado, reparacion, baja'),
 ];
 

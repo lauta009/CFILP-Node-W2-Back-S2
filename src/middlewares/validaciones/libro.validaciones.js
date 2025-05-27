@@ -29,13 +29,16 @@ const crearLibroValidator = [
   body('titulo')
     .notEmpty().withMessage('El título es obligatorio')
     .isLength({ max: 150 }).withMessage('El título no puede tener más de 150 caracteres')
-    .isString().withMessage('El título debe ser una cadena de texto'),
+    .isString().withMessage('El título debe ser una cadena de texto')
+    .escape(),
+
   
   body('saga_coleccion')
     .optional()
     .isString().withMessage('La saga o colección debe ser una cadena de texto')
     .trim()
-    .isLength({ max: 100 }).withMessage('La saga o colección no puede tener más de 100 caracteres'),
+    .isLength({ max: 100 }).withMessage('La saga o colección no puede tener más de 100 caracteres')
+    .escape(),
   
   body('editorial_id')
     .optional({ checkFalsy: true })
@@ -55,7 +58,8 @@ const crearLibroValidator = [
   body('editorial')
     .optional({ checkFalsy: true })
     .isString()
-    .isLength({ max: 255 }),
+    .isLength({ max: 255 })
+    .escape(),
 
   
   body('categoria_id')
@@ -76,11 +80,13 @@ const crearLibroValidator = [
   body('categoria')
     .optional({ checkFalsy: true })
     .isString()
-    .isLength({ max: 255 }),
+    .isLength({ max: 255 })
+    .escape(),
 
   body('fecha_publicacion')
     .optional({ checkFalsy: true })
-    .isISO8601().withMessage('Formato inválido (YYYY-MM-DD)'),
+    .isISO8601().withMessage('Formato inválido (YYYY-MM-DD)')
+    .escape(),
 
   body('isbn')
     .optional({ checkFalsy: true })
@@ -95,19 +101,25 @@ const crearLibroValidator = [
         }
       }
       return true;
-    }),
+    })
+    .escape(),
 
   body('resumen')
     .optional()
-    .isString(),
+    .isString()
+    .trim()
+    .isLength({ max: 500 }).withMessage('El resumen no debe superar los 500 caracteres')
+    .escape(),
 
   body('portada_url')
     .optional()
-    .isURL(),
+    .isURL()
+    .escape(),
 
   body('idioma')
     .optional()
-    .isLength({ max: 50 }),
+    .isLength({ max: 50 })
+    .escape(),
 
   body('nro_paginas')
     .optional()
@@ -132,7 +144,7 @@ const crearLibroValidator = [
 const listarLibrosValidator = [
   query('limit')
     .optional()
-    .isInt({ min: 1 }).withMessage('El límite debe ser un número entero positivo'),
+    .isInt({ min: 1 }).withMessage('El límite debe ser un número entero positivo'),    
 
   query('offset')
     .optional()

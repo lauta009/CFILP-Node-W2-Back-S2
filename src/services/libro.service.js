@@ -141,10 +141,10 @@ function _formatearLibroCompleto(libro) {
 function _construirWhereDeLaBusqueda(queryParam) {//
   const where = {};
   if (queryParam.titulo) {
-    where.titulo = { [Op.iLike]: `%${queryParam.titulo}%` };
+    where.titulo = { [Op.like]: `%${queryParam.titulo}%` };
   }
   if (queryParam.saga) {
-    where.saga_coleccion = { [Op.iLike]: `%${queryParam.saga}%` };
+    where.saga_coleccion = { [Op.like]: `%${queryParam.saga}%` };
   }
   return where;
 };
@@ -386,24 +386,19 @@ async function obtenerMetricasLibros() {
 }
 
 async function obtenerLibrosConEjemplares() {
-  try {
-    const libros = await Libro.findAll({
-      attributes: ['id', 'titulo', 'isbn'],
-      include: [{
-        model: Ejemplar,
-        as: 'ejemplares',
-        attributes: ['codigo_barra', 'estado']
-      }]
-    });
+  const libros = await Libro.findAll({
+    attributes: ['id', 'titulo', 'isbn'],
+    include: [{
+      model: Ejemplar,
+      as: 'ejemplares',
+      attributes: ['codigo_barra', 'estado']
+    }]
+  });
 
-    if (libros.length === 0) {
-      throw new NotFoundError('No se encontraron libros con ejemplares.');
-    }
-    return libros;
-  } catch (error) {
-    console.error('Error al obtener libros con sus ejemplares:', error);
-    throw error;
+  if (libros.length === 0) {
+    throw new NotFoundError('No se encontraron libros con ejemplares.');
   }
+  return libros;
 }
 
 async function obtenerLibrosConEjemplaresPorEstado(estado) {

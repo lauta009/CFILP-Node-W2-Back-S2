@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { Usuario } = require('../models');
-const { NotFoundError, BadRequestError} = require('../utils/appErrors');
+const { BadRequestError} = require('../utils/appErrors');
 
 
 const validarPassword = async (passwordPlano, passwordHasheado) => {

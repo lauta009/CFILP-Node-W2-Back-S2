@@ -1,5 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const helmet = require('helmet'); // Para aplicar automáticamente una serie de encabezados de seguridad recomendados.
 
 const { sync } = require('../sequelize-db/config/database');
 
@@ -18,7 +19,7 @@ const ejemplarRoutes = require('./routes/ejemplar.routes');
 const alquilerRoutes = require('./routes/alquiler.routes');
 const categoriaRoutes = require('./routes/categoria.routes');
 
-const {authMiddleware, } = require('./middlewares/auth.middleware');
+const { authMiddleware } = require('./middlewares/auth.middleware');
 const esRutaPublica = require('./middlewares/rutasPublicas.middleware');
 
 
@@ -30,6 +31,7 @@ const app = express();
 // Middlewares de aplicación
 app.use(express.urlencoded({ extended: true })); 
 app.use(express.json());
+app.use(helmet());
 const swaggerDocument = YAML.load(path.join(__dirname, '../docs/swagger.yml'));
 
 // Rutas públicas
@@ -66,11 +68,17 @@ app.use((req, res, next) => {
 app.use(globalErrorHandler);
 
 
+// Define el puerto que va a usar el servidor
+// Usa process.env.PORT para entornos de despliegue,
+// o el 3000 como default para desarrollo local.
+const PORT = process.env.PORT || 3000; 
+
 // Sincronización con la bbdd y arranque del servidor
 sync()
   .then(() => {
-    app.listen(3000, () => {
-      console.log('✅ Servidor corriendo en http://localhost:3000');
+    app.listen(PORT, () => { // Usa la variable PORT aquí
+      console.log(`✅ Servidor corriendo en http://localhost:${PORT}`); 
+      console.log(`Entorno: ${process.env.NODE_ENV || 'development'}`);
     });
   })
   .catch((err) => {

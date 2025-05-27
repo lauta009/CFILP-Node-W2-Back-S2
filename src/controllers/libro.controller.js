@@ -17,12 +17,17 @@ const libroController = {
   async listar(req, res, next) {
     try {
       const { categoria, editorial, autor, page, limit, detalle } = req.query;
+      let limite = parseInt(limit) || 10; // Por defecto trae los 10 primeros libros de la bbdd
+
+      // Límite máximo permitido
+      if (limite > 100) limite = 100; // Evita sobrecarga del servidor 
+
       const params = {
         categoria: categoria ?? null,
         editorial: editorial ?? null,
         autor: autor ?? null,
         page: page ?? 1,
-        limit: limit ?? 100000,
+        limit: limite ?? 100000,
         detalle: detalle ?? 'completo', 
       };
       const resultado = await libroService.listarLibros(params);
@@ -49,7 +54,7 @@ const libroController = {
   async buscarLibrosController(req, res, next) {
     try {
       const { titulo, saga } = req.query;
-      const resultados = await libroService.buscarLibros({ titulo, saga });
+      const resultados = await libroService.buscarLibrosPorCondicion({ titulo, saga });
       res.status(200).json(resultados);
       if (resultados.length === 0) {
         return next(new NotFoundError('No se encontraron libros con esos criterios.'));

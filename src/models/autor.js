@@ -23,6 +23,7 @@ module.exports = (sequelize) => {
     }
   }, {
     sequelize,
+    timestamps:true,
     modelName: 'Autor',
     tableName: 'autores',
     underscored: true
