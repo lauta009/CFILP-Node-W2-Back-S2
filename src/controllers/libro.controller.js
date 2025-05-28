@@ -31,7 +31,7 @@ const libroController = {
         detalle: detalle ?? 'completo', 
       };
       const resultado = await libroService.listarLibros(params);
-      console.log('📚 Datos crudos de libros:\n', JSON.stringify(resultado.libros, null, 2));
+
       res.status(200).json(resultado);
     } catch (error) {
       next(error);

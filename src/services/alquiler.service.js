@@ -9,13 +9,8 @@ let limiteDiasDeAlquiler = 30;
 
 async function _verificarUsuarioActivo(usuarioId) {
   const usuario = await Usuario.findByPk(usuarioId);
-<<<<<<< HEAD
-  if (!usuario || !usuario.estado) {
-    return  new BadRequestError(`El usuario con ID ${usuarioId} no puede alquilar ya que se encuentra sancionado o no existe.`);
-=======
   if (!usuario?.estado) {
     throw new BadRequestError(`El usuario con ID ${usuarioId} no puede alquilar ya que se encuentra sancionado o no existe.`);
->>>>>>> origin
   }
   return usuario;
 }
@@ -47,6 +42,7 @@ async function _verificarLimiteAlquileres(usuarioId, limite) {
 }
 
 async function _crearNuevoAlquiler(usuarioId, ejemplarId, fechaVencimiento) {
+  try {
   const alquilerActivo = await Alquiler.findOne({
     where: {
       usuario_id: usuarioId,
@@ -76,35 +72,35 @@ async function _crearNuevoAlquiler(usuarioId, ejemplarId, fechaVencimiento) {
   await Ejemplar.update({ estado: 'prestado' }, { where: { id: ejemplarId } });
 
   // 🔄 Sumar los datos adicionales: email del usuario y título del libro
-  const alquilerConDatos = await Alquiler.findOne({
-    where: {
-      usuario_id: usuarioId,
-      ejemplar_id: ejemplarId,
-      fecha_devolucion: null
+  await nuevoAlquiler.reload({
+  include: [
+    {
+      model: Ejemplar,
+      as: 'ejemplar',
+      attributes: ['id', 'codigo_barra'],
+      include: [{
+        model: Libro,
+        as: 'libro',
+        attributes: ['titulo']
+      }]
     },
-    include: [
-      {
-        model: Ejemplar,
-        as: 'ejemplar',
-        attributes: ['id', 'codigo_barra'],
-        include: [{
-          model: Libro,
-          as: 'libro',
-          attributes: ['titulo']
-        }]
-      },
-      {
-        model: Usuario,
-        as: 'usuario',
-        attributes: ['id', 'nombre', 'email']
-      }
-    ]
-  });
-
-  return alquilerConDatos;
+    {
+      model: Usuario,
+      as: 'usuario',
+      attributes: ['id', 'nombre', 'email']
+    }
+  ]
+});
+  console.log('Nuevo alquiler creado:', nuevoAlquiler);
+  return nuevoAlquiler;
+  } catch (error) {
+    console.error('Error al crear el nuevo alquiler:', error);
+    throw new BadRequestError('No se pudo procesar el alquiler. Verifique los datos ingresados.');
+  }
 }
 
 async function alquilarLibroRegular(usuarioId, ejemplarId) {
+  try {
   const usuario = await _verificarUsuarioActivo(usuarioId);
 
   if (usuario.rol_id !== 2) {
@@ -125,28 +121,36 @@ async function alquilarLibroRegular(usuarioId, ejemplarId) {
   
   await _verificarLimiteAlquileres(usuario.id, limiteAlquileresSimultaneos); 
   const nuevoAlquiler =  await _crearNuevoAlquiler(usuario.id, ejemplar.id, fechaVencimiento);
-   return await Alquiler.findByPk(nuevoAlquiler.id, {
-    include: [
-      {
-        model: Ejemplar,
-        as: 'ejemplar',
-        attributes: ['id', 'codigo_barra'],
-        include: [
-          {
-            model: Libro,
-            as: 'libro',
-            attributes: ['titulo']
-          }
-        ]
-      },
-      {
-        model: Usuario,
-        as: 'usuario',
-        attributes: ['id', 'nombre', 'apellido', 'email']
-      }
-    ]
-  });
-  
+ 
+   return await Alquiler.findOne({
+  where: {
+    usuario_id: nuevoAlquiler.usuario_id,
+    ejemplar_id: nuevoAlquiler.ejemplar_id
+  },
+  include: [
+    {
+      model: Ejemplar,
+      as: 'ejemplar',
+      attributes: ['id', 'codigo_barra'],
+      include: [
+        {
+          model: Libro,
+          as: 'libro',
+          attributes: ['titulo']
+        }
+      ]
+    },
+    {
+      model: Usuario,
+      as: 'usuario',
+      attributes: ['id', 'nombre', 'apellido', 'email']
+    }
+  ]
+});
+} catch (error) {
+  console.error('Error al alquilar el libro regular:', error);
+  throw new BadRequestError('No se pudo procesar el alquiler. Verifique los datos ingresados.');
+  }
 }
 
 async function alquilarLibroPremium(usuarioId, ejemplarId) {
@@ -172,6 +176,7 @@ async function alquilarLibroPremium(usuarioId, ejemplarId) {
 
 async function devolverEjemplar(usuarioId, ejemplarId) {
   // 1. Verificar si existe un alquiler activo para este usuario y ejemplar
+  try {
   const alquilerActivo = await Alquiler.findOne({
     where: {
       usuario_id: usuarioId,
@@ -180,7 +185,14 @@ async function devolverEjemplar(usuarioId, ejemplarId) {
     },
     include: [{
       model: Ejemplar,
-      as: 'ejemplar'
+      as: 'ejemplar',
+      include: [
+          {
+            model: Libro,
+            as: 'libro',
+            attributes: ['titulo']
+          }
+        ]
     }]
   });
 
@@ -213,7 +225,11 @@ async function devolverEjemplar(usuarioId, ejemplarId) {
     }
   }
 
-  return { mensaje: `Ejemplar con ID ${ejemplarId} devuelto exitosamente.` };
+  return { mensaje: `Ejemplar con ID ${ejemplarId} devuelto exitosamente.`, ejemplar: alquilerActivo.ejemplar, usuario: alquilerActivo.usuario };
+}catch (error) {
+  console.error('Error al devolver el ejemplar:', error);
+  throw new BadRequestError('No se pudo procesar la devolución del ejemplar. Verifique los datos ingresados.');
+  }
 }
 
 async function obtenerTodosLosAlquileres() {

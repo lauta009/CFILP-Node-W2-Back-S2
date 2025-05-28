@@ -51,7 +51,7 @@ async function listarLibros() {
 
     console.log('📚 Libros disponibles (top 5 ordenados):');
     console.log('----------------------------------------');
-    console.log(`Total de libros: ${response.data.total}`);
+    console.log(`LISTADO DE LOS PRIMEROS 5 LIBROS`);
     console.log('----------------------------------------');
 
     libros.forEach((libro, i) => {
@@ -73,11 +73,12 @@ async function solicitarAlquilerRegular(token, ejemplarId) {
       { ejemplar_id: ejemplarId },
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    console.log(`📦 Alquiler registrado para ejemplar ID ${ejemplarId}`);
+
+    console.log(`📦 Alquiler registrado para ejemplar ID ${ejemplarId}: (libro: ${response.data.ejemplar.libro.titulo} | usuario: ${response.data.usuario.nombre} ${response.data.usuario.apellido}`);
     return response.data;
   } catch (error) {
     console.error('❌ Error al solicitar alquiler:', error.response ? error.response.data : error.message);
-    throw error;
+    
   }
 }
 
@@ -87,8 +88,9 @@ async function devolverLibro(token, ejemplarId) {
       { ejemplar_id: ejemplarId },
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    console.log(`📤 Devolución exitosa para ejemplar ID ${ejemplarId}`);
-    console.log(`Detalles de la devolución: ${JSON.stringify(response.data, null, 2)}`);
+    //console.log(`Detalles de la devolución: ${JSON.stringify(response.data, null, 2)}`);
+
+    console.log(`📤 Devolución exitosa para ejemplar de: "${response.data.ejemplar.libro.titulo}"`);
     return response.data;
   } catch (error) {
     console.error('❌ Error al devolver libro:', error.response ? error.response.data : error.message);
@@ -194,10 +196,11 @@ async function main() {
     await delay(PAUSE);
 
     console.log('\n📦 PASO 5: SOLICITUD DE ALQUILER');
+
+
     const alquiler = await solicitarAlquilerRegular(tokenRegular, ejemplarId);
     if (alquiler) {
       console.log(`✅ Alquiler exitoso para ejemplar ID ${ejemplarId}`);
-      console.log(`Detalles del alquiler: ${JSON.stringify(alquiler, null, 2)}`);
       console.log('-------------------------');
       console.log('📖 Detalles del libro alquilado:');
       console.log(`📗Título: ${alquiler.ejemplar.libro.titulo}`);

@@ -11,8 +11,22 @@ const alquilerController = {
     }
     try {
       const alquiler = await alquilerService.alquilarLibroRegular(usuarioId, ejemplar_id);
-
-      res.status(201).json(alquiler);
+      console.log('Alquiler regular creado:', JSON.stringify(alquiler, null, 2));
+      res.status(201).json({
+        fecha_alquiler: alquiler.fecha_alquiler,
+        fecha_vencimiento: alquiler.fecha_vencimiento,
+        ejemplar: {
+          codigo_barra: alquiler.ejemplar.codigo_barra,
+          libro: {
+            titulo: alquiler.ejemplar.libro.titulo
+          }
+        },
+        usuario: {
+        nombre: alquiler.usuario.nombre,
+        apellido: alquiler.usuario.apellido,
+        email: alquiler.usuario.email
+      }
+      });
     } catch (error) {
       console.log('Error al crear el alquiler regular:', error);
       next(error);
@@ -43,6 +57,7 @@ const alquilerController = {
     }
     try {
       const resultadoDevolucion = await alquilerService.devolverEjemplar(usuarioId, ejemplar_id);
+      console.log('Resultado de la devolución:',  JSON.stringify(resultadoDevolucion, null, 2));
       res.status(200).json(resultadoDevolucion);
     } catch (error) {
       next(error);
