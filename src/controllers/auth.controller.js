@@ -28,6 +28,16 @@ async function login(req, res, next) {
       return next(new UnauthorizedError('Error al generar el token.'));
     }
 
+    let usuarioFront = {
+      apellido: usuario.apellido,
+      nombre: usuario.nombre,
+      email: usuario.email,
+      telefono: usuario.telefono,
+      direccion: usuario.direccion,
+      localidad: usuario.localidad,
+      nro_doc: usuario.nro_doc,
+      cod_postal: usuario.cod_postal,
+      };
     usuario.ultimo_login = new Date();
 
     const ultimoLogin = await updateUsuario(usuario.id, {ultimo_login:usuario.ultimo_login});
@@ -35,7 +45,7 @@ async function login(req, res, next) {
       return next(new BadRequestError('Error interno al loguearse'));
     }
     
-    res.json({ token });
+    res.json({ token , usuario: usuarioFront });
   } catch (error) {
     next(error);
   }

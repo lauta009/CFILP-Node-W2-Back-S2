@@ -9,7 +9,9 @@ module.exports = {
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
     dialect: 'mysql',
-    logging: console.log, // es para ver los logs de las consultas SQL
+
+    logging: false, // es para ver los logs de las consultas SQL
+
   },
   test: {
     username: process.env.DB_TEST_USER || 'root',  
