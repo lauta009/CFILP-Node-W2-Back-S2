@@ -4,7 +4,7 @@
   "description": "Repositorio Back Squad 2 | Node | CFI LP 25",
   "main": "app.js",
   "scripts": {
-    "start": "node --watch ./src/app.js",
+    "start": "node ./src/app.js",
     "test": "jest --detectOpenHandles --forceExit",
     "lint": "eslint . --fix"
   },
