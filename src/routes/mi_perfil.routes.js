@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {validarMiPerfilUsuario, validarPassword} = require('../middlewares/validaciones/usuario.validate');
-const mi_perfilController = require('../controllers/miPerfil.Controller');
+const mi_perfilController = require('../controllers/miPerfil.controller');
 const validarErrores = require('../middlewares/validaciones/validarErrores');
 const { checkRolYPermisos } = require('../middlewares/auth.middleware');
 
