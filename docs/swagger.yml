@@ -5,7 +5,7 @@ info:
   description: Documentación de la API para la gestión de libros, usuarios y alquileres
 
 servers:
-  - url: http://localhost:3000/api
+  - url: https://cfilp-node-w2-back-s2-production.up.railway.app/api
 
 components:
   securitySchemes:
